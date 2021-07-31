@@ -1,0 +1,15 @@
+.rc-slider-track {
+    box-sizing: unset!important;
+    background-color: gray;
+    width: 50px;
+}
+
+.rc-slider-handle {
+    box-sizing: unset!important;
+    background-color: blue;
+    border-color: blue;
+}
+
+.rc-slider-handle-active:active {
+    border-color: blue;
+}
