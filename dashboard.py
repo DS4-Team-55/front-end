@@ -22,28 +22,39 @@ import requests
 import json
 import tabs_layout
 from data_loader import DataLoader
+import generate_figures_info
 
 
-tabs_styles = {
-    'height': '44px'
-}
 tab_style = {
-    'borderBottom': '2px solid #d6d6d6',
+    'borderTop': '1px solid #d6d6d6',
     'backgroundColor': '#5d90cc',
-    'padding': '6px',
     'fontWeight': 'bold',
-    'color': 'white'
+    'color': 'white',
+    'width': '12.5%'
 }
 
-tab_selected_style = {
-    'borderTop': '2px solid #d6d6d6',
-    'borderBottom': '2px solid #d6d6d6',
+label_style = {
+    'color': 'white',
+    'width': '100%'
+}
+
+active_label_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
     'backgroundColor': '#1663b0',
     'color': 'white',
     'fontWeight': 'bold',
-    'padding': '6px'
+    'width': '100%'
 }
 
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#1663b0',
+    'color': 'white',
+    'fontWeight': 'bold',
+    'width': '12.5%'
+}
 
 def serve_layout():
     return dbc.Container(
@@ -60,17 +71,17 @@ def serve_layout():
                                             src='data:image/png;base64,{}'.format(
                                                 base64.b64encode(
                                                     open(
-                                                        './assets/logo_alcaldia.jpg', 'rb'
+                                                        './assets/logo.jpeg', 'rb'
                                                     ).read()
                                                 ).decode()
                                             ),
-                                            height='90',
-                                            width='300'
+                                            height='50%',
+                                            width='80%'
                                         )
-                                    ], className='text-left', width=3),
+                                    ], width={'size': 3}, className='text-left'),
                                     dbc.Col([
-                                        html.H1('Prevnat: Maternal Morbidity Alert Generation', style={'fontSize': 35, 'fontWeight': 'bold'})
-                                    ], className='text-center', align="center", width=6),
+                                        html.H1('Prevnant: before complication', style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '2vw'})
+                                    ], width={'size': 6}, className='text-center', align="center"),
                                     dbc.Col([
                                         html.Img(
                                             src='data:image/png;base64,{}'.format(
@@ -80,10 +91,10 @@ def serve_layout():
                                                     ).read()
                                                 ).decode()
                                             ),
-                                            height='90',
-                                            width='300'
+                                            height='45%',
+                                            width='80%'
                                         )
-                                    ], className='text-right', width=3)
+                                    ], width={'size': 3}, className='text-right')
                                 ])
                             ],
                             style={
@@ -96,18 +107,18 @@ def serve_layout():
             ), 
             dbc.Row([
                 dbc.Col([
-                    dcc.Tabs(
-                        id="dashboard-tabs", value='tab1', 
+                    dbc.Tabs(
+                        id="dashboard-tabs", active_tab='tab1', 
                         children=[
-                            dcc.Tab(label='Context', value='tab1', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Live Births', value='tab2', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Morbidity', value='tab3', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Mortality', value='tab4', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='COVID-19', value='tab5', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Model', value='tab6', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Prevnant', value='tab7', style=tab_style, selected_style=tab_selected_style),
-                            dcc.Tab(label='Team', value='tab8', style=tab_style, selected_style=tab_selected_style)
-                        ], style=tabs_styles
+                            dbc.Tab(label='Context', tab_id='tab1', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Births', tab_id='tab2', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Morbidity', tab_id='tab3', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Mortality', tab_id='tab4', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='COVID-19', tab_id='tab5', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Model', tab_id='tab6', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Prevnant', tab_id='tab7', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Team', tab_id='tab8', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style)
+                        ]
                     )
                 ])
             ], no_gutters=False, justify='around'), 
@@ -126,25 +137,71 @@ data = DataLoader()
 # Tabs callback
 @app.callback(
     Output('tab_content', 'children'),
-    Input('dashboard-tabs', 'value')
+    Input('dashboard-tabs', 'active_tab')
 )
 def tab_selector(tab):
     if tab == 'tab1':
         return tabs_layout.context_layout(data)
     elif tab == 'tab2':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.births_layout(data)
     elif tab == 'tab3':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.morbidity_layout(data)
     elif tab == 'tab4':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.mortality_layout(data)
     elif tab == 'tab5':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.births_layout_2(data)
     elif tab == 'tab6':
         return tabs_layout.context_layout(data)
     elif tab == 'tab7':
         return tabs_layout.context_layout(data)
     elif tab == 'tab8':
         return tabs_layout.context_layout(data)
+
+
+# Births callbacks
+@app.callback(
+    Output('plt_births_low_weight_description', 'figure'), 
+    Output('plt_births_low_weight_distribution', 'figure'), 
+    Input('low_weight_description_selector', 'value')
+)
+def morbidity_plots(input_value):
+    if input_value is None:
+        return {}, {}
+
+    info_ = generate_figures_info.births_low_weight(data, input_value)
+    return info_['plt_births_low_weight_description'], info_['plt_births_low_weight_distribution']
+
+
+# Morbidity callbacks
+@app.callback(
+    Output('plt_morbidity_failures', 'figure'), 
+    Output('plt_morbidity_grouped_cause', 'figure'), 
+    Output('plt_morbidity_grouped_cause_year', 'figure'), 
+    Output('plt_morbidity_pregnancy', 'figure'), 
+    Input('morbidity_var_selector', 'value')
+)
+def morbidity_plots(input_value):
+    if input_value is None:
+        return {}, {}, {}, {}
+
+    info_ = generate_figures_info.morbidity_plots(data, input_value)
+    return info_['plt_morbidity_failures'], info_['plt_morbidity_grouped_cause'], info_['plt_morbidity_grouped_cause_year'], info_['plt_morbidity_pregnancy']
+
+
+# Mortality callbacks
+@app.callback(
+    Output('plt_mortality_demographic', 'figure'), 
+    Output('plt_mortality_year', 'figure'), 
+    Output('plt_mortality_upgd', 'figure'), 
+    Output('plt_mortality_cbmte', 'figure'),
+    Input('mortality_var_selector', 'value')
+)
+def mortality_plots(input_value):
+    if input_value is None:
+        return {}, {}, {}, {}
+
+    info_ = generate_figures_info.mortality_plots(data, input_value)
+    return info_['plt_mortality_demographic'], info_['plt_mortality_year'], info_['plt_mortality_upgd'], info_['plt_mortality_cbmte']
 
 
 if __name__ == "__main__":

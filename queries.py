@@ -97,3 +97,7 @@ SELECT * FROM saludata.nacidos_vivos
 covid_query = """
 SELECT municipio FROM saludata.coronavirus
 """
+
+lowweight_query = """
+SELECT * FROM saludata.bajo_peso
+"""

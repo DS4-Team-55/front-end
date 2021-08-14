@@ -13,9 +13,11 @@ class DataLoader:
         # data
         self.df_master = pd.read_sql(queries.master_query, con=self.credentials)
         self.df_lb = pd.read_sql(queries.livebirths_query, con=self.credentials)
+        self.df_lw = pd.read_sql(queries.lowweight_query, con=self.credentials)
         self.df_morbidity = pd.read_sql(queries.morbidity_query, con=self.credentials)
         self.df_mortality = pd.read_sql(queries.mortality_query, con=self.credentials)
-        self.df_covid = pd.read_sql(queries.covid_query, con=self.credentials)
+        # self.df_covid = pd.read_sql(queries.covid_query, con=self.credentials)
+
         self.df_loc = pd.read_csv(self.divipola, encoding='ISO-8859-1')
         self.df_loc = self.df_loc[self.df_loc['NOM_DPTO']=='SANTANDER']
         self.df_loc['NOM_CPOB'] = self.df_loc['NOM_CPOB'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
@@ -23,6 +25,9 @@ class DataLoader:
 
         # preprocess data
         self.df_lb['edad_madre'] = self.df_lb['edad_madre'].apply(lambda x: x.split('(')[0]).astype(int)
+        self.df_lb['edad_padre'] = self.df_lb['edad_padre'].astype(str).apply(lambda x: x.split('(')[0]).astype(int)
+        self.df_lw['peso_nacer'] = self.df_lw['peso_nacer'].astype(int)
+
 
     '''
 
