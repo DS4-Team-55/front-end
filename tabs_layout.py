@@ -15,7 +15,6 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 import plotly.graph_objects as go
-from scipy import signal
 import numpy as np
 import generate_figures_info
 
@@ -85,7 +84,7 @@ def context_layout(data):
                         ])
                     ], style={'margin-top': '50px'}, no_gutters=False, justify='around')
                 ], width={'size': 5, 'offset': 0})
-            ])
+            ],className='fndtb')
         ])
 
 
@@ -141,7 +140,7 @@ def births_layout(data):
                     )
                 ], width={'size': 4, 'offset': 0})
             ], style={'margin-top': '20px'}, no_gutters=False, justify='around')
-        ])
+        ],className='fndtb')
 
 
 def births_layout_2(data):
@@ -249,7 +248,7 @@ def births_layout_2(data):
                     ])
                 ])
             ], style={'margin-top': '20px', 'margin-bottom': '20px'}, no_gutters=False, justify='around')
-        ])
+        ],className='fndtb')
 
 
 
@@ -310,7 +309,7 @@ def morbidity_layout(data):
                     )
                 ], width={'size': 10, 'offset': 0})
             ], style={'margin-top': '20px'}, no_gutters=False, justify='around')
-        ])
+        ],className='fndtb')
 
 
 def mortality_layout(data):
@@ -371,4 +370,4 @@ def mortality_layout(data):
                     )
                 ], width={'size': 10, 'offset': 0})
             ], style={'margin-top': '20px'}, no_gutters=False, justify='around')
-        ])
+        ],className='fndtb')

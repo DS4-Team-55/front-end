@@ -57,11 +57,12 @@ def context(data):
         y=ages_['Count']
     ))
     fig.update_layout(
-        font_family="Courier New", 
+        font_family="sans-serif", 
         title="Maternal's age", 
         xaxis_title="Age",
         yaxis_title="Number of Maternals",
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),
+	plot_bgcolor = "white"
     )
     resp['plt_context_ages'] = deepcopy(fig)
 
@@ -73,7 +74,7 @@ def context(data):
         orientation='h'
     ))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         yaxis=dict(
             tickmode='linear',
             dtick=1
@@ -81,7 +82,7 @@ def context(data):
         title='Pregnant women per socioeconomic status', 
         xaxis_title="Number of Pregnant women",
         yaxis_title="Status",
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_context_estrato'] = deepcopy(fig)
 
@@ -89,18 +90,20 @@ def context(data):
     data.df_lb['edad_madre_rango'] = data.df_lb['edad_madre'].map(get_age_range)
     fig = px.sunburst(data.df_lb, path=['estado_conyugal_madre', 'edad_madre_rango', 'nivel_educativo_madre'])
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Marital - Age Range - Academic Level of pregnant women',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),
+	plot_bgcolor = "white"
     )
     resp['plt_context_marital_age_academic'] = deepcopy(fig)
 
     # plt_context_parents_age
     fig = px.sunburst(data.df_lb[data.df_lb['edad_madre'] < 18], path=['edad_madre', 'edad_padre'])
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Mother Age (Teenager) and Father Age',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),
+	plot_bgcolor = "white"
     )
     resp['plt_context_parents_age'] = deepcopy(fig)
 
@@ -123,13 +126,13 @@ def births(data):
     data.df_lb['bajo_peso'] = data.df_lb['peso_gramos'].apply(lambda x: 1 if x < 2500 else 0)
     fig = px.bar(data.df_lb.groupby('edad_madre')['bajo_peso'].sum().to_frame().reset_index(), x='edad_madre', y='bajo_peso')
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         xaxis=dict(
             tickmode='linear',
             dtick=1
         ),
         title='Low weight vs Mother Age',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_births_low_weight'] = deepcopy(fig)
 
@@ -138,9 +141,9 @@ def births(data):
     for item in [x for x in range(1, 11)]:
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['numero_hijos_nacidos_vivos'] == item]['peso_gramos'], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Number of children',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_num_children'] = deepcopy(fig)
@@ -150,9 +153,9 @@ def births(data):
     for item in ['SIMPLE', 'DOBLE']:
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['multiplicidad_embarazo'] == item]['peso_gramos'], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Pregnant multiplicity',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_multiplicity'] = deepcopy(fig)
@@ -162,9 +165,9 @@ def births(data):
     for item in ['edad_madre', 'edad_padre']:
         fig.add_trace(go.Box(y=data.df_lb[item], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Parents age',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_parents_age'] = deepcopy(fig)
@@ -174,9 +177,9 @@ def births(data):
     for item in ['CESÁREA', 'ESPONTÁNEO', 'INSTRUMENTADO']:
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['tipo_parto'] == item]['peso_gramos'], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Birth type',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_birth_type'] = deepcopy(fig)
@@ -187,9 +190,9 @@ def births(data):
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['estado_conyugal_madre'] == item]['peso_gramos'], name=item))
         fig.update_layout(xaxis=dict(showticklabels=False))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Marital status',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_marital'] = deepcopy(fig)
@@ -213,13 +216,13 @@ def births_low_weight(data, input_value):
         key = map_dict[input_value]
         fig = px.bar(data.df_lw.groupby(key).size().to_frame(name='Count').reset_index(), x=key, y='Count')
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         xaxis=dict(
             tickmode='linear',
             dtick=1
         ),
         title='Low weight representation',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_births_low_weight_description'] = deepcopy(fig)
 
@@ -227,9 +230,9 @@ def births_low_weight(data, input_value):
     fig = go.Figure()
     fig = px.histogram(data.df_lw, x='peso_nacer', nbins=20)
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Low weight distribution',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_births_low_weight_distribution'] = deepcopy(fig)
 
@@ -250,9 +253,9 @@ def births2(data):
         fig.add_trace(go.Histogram(x=tmp[tmp['nhnv'] == item]['peso_gramos'], name=item, marker_color=colors[idx]))
 
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Number of children',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         barmode='overlay'
     )
     fig.update_traces(opacity=0.75)
@@ -263,9 +266,9 @@ def births2(data):
     for item in ['SIMPLE', 'DOBLE']:
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['multiplicidad_embarazo'] == item]['peso_gramos'], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Pregnant multiplicity',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_multiplicity_2'] = deepcopy(fig)
@@ -275,9 +278,9 @@ def births2(data):
     for item in ['edad_madre', 'edad_padre']:
         fig.add_trace(go.Box(y=data.df_lb[item], name=item))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Parents age',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_parents_age_2'] = deepcopy(fig)
@@ -291,9 +294,9 @@ def births2(data):
 
     fig = ff.create_distplot(hist_data, keep, colors=colors, bin_size=50, show_rug=False)
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Birth type',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
     )
     fig.update_traces(opacity=0.5)
     resp['plt_births_birth_type_2'] = deepcopy(fig)
@@ -304,9 +307,9 @@ def births2(data):
         fig.add_trace(go.Box(y=data.df_lb[data.df_lb['estado_conyugal_madre'] == item]['peso_gramos'], boxpoints='all', name=item))
         fig.update_layout(xaxis=dict(showticklabels=False))
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Weight vs Marital status',
-        margin=dict(t=50, b=0, l=0, r=0), 
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
         showlegend=False
     )
     resp['plt_births_marital_2'] = deepcopy(fig)
@@ -338,9 +341,9 @@ def morbidity_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Health failures',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_morbidity_failures'] = deepcopy(fig)
 
@@ -355,9 +358,9 @@ def morbidity_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Grouped cause',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_morbidity_grouped_cause'] = deepcopy(fig)
 
@@ -372,9 +375,9 @@ def morbidity_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Grouped cause by year',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_morbidity_grouped_cause_year'] = deepcopy(fig)
 
@@ -390,9 +393,9 @@ def morbidity_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Maternal situation',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_morbidity_pregnancy'] = deepcopy(fig)
 
@@ -410,9 +413,9 @@ def mortality_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Maternal Deaths',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_mortality_demographic'] = deepcopy(fig)
 
@@ -424,9 +427,9 @@ def mortality_plots(data, key):
             tickmode='linear',
             dtick=1
         ), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Deaths vs Year',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_mortality_year'] = deepcopy(fig)
 
@@ -436,9 +439,9 @@ def mortality_plots(data, key):
     fig = px.bar(summary, x=summary.index, y='Count')
     fig.update_layout(
         xaxis=dict(showticklabels=False), 
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Deaths vs UPGD',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_mortality_upgd'] = deepcopy(fig)
 
@@ -447,9 +450,9 @@ def mortality_plots(data, key):
     keep = ['U071', 'R579', 'J159', 'U072', 'I472', 'R571', 'I619'] # more than 1
     fig = px.sunburst(data.df_mortality[data.df_mortality['cbmte_'].isin(keep)], path=['cbmte_', 'edad_'])
     fig.update_layout(
-        font_family="Courier New",
+        font_family="sans-serif",
         title='Basic Death Cause and Age',
-        margin=dict(t=50, b=0, l=0, r=0)
+        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
     )
     resp['plt_mortality_cbmte'] = deepcopy(fig)
 
