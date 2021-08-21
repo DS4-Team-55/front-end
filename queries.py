@@ -82,22 +82,14 @@ order by ini_sin_covid, fec_defunsion, fec_not_morb
 ;
 """
 
-morbidity_query = """
-SELECT * FROM saludata.morbilidad
-"""
+master2_query = 'SELECT * FROM saludata.maestra_v2'
 
-mortality_query = """
-SELECT * FROM saludata.mortalidad
-"""
+morbidity_query = 'SELECT * FROM saludata.morbilidad'
 
-livebirths_query = """
-SELECT * FROM saludata.nacidos_vivos
-"""
+mortality_query = 'SELECT * FROM saludata.mortalidad'
 
-covid_query = """
-SELECT municipio FROM saludata.coronavirus
-"""
+livebirths_query = 'SELECT * FROM saludata.nacidos_vivos'
 
-lowweight_query = """
-SELECT * FROM saludata.bajo_peso
-"""
+covid_query = 'SELECT municipio FROM saludata.coronavirus'
+
+lowweight_query = 'SELECT * FROM saludata.bajo_peso'

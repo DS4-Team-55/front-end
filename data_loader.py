@@ -12,6 +12,7 @@ class DataLoader:
 
         # data
         self.df_master = pd.read_sql(queries.master_query, con=self.credentials)
+        self.df_masterv2 = pd.read_sql(queries.master2_query, con=self.credentials)
         self.df_lb = pd.read_sql(queries.livebirths_query, con=self.credentials)
         self.df_lw = pd.read_sql(queries.lowweight_query, con=self.credentials)
         self.df_morbidity = pd.read_sql(queries.morbidity_query, con=self.credentials)

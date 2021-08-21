@@ -13,3 +13,23 @@
 .rc-slider-handle-active:active {
     border-color: blue;
 }
+
+.nav-item {
+    font-family: glacial indifference , sans-serif
+}
+
+.dash-graph {
+    border: 2px;
+    border-radius: 2%;
+    border-color: rgba(200, 200, 200, 0.4)
+}
+
+.fndtb {
+    background: linear-gradient(180deg, rgba(93,144,204,1) 0%, #dee8f2 1%);
+}
+
+.main-svg {
+    border:1px; 
+    border-radius: 10px; 
+    box-shadow: 2px 2px 5px 0px #bfbfbf;
+}

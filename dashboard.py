@@ -13,8 +13,10 @@ import os
 import base64
 import pandas as pd
 from PIL import Image
+import cv2
 from io import BytesIO
 import plotly.graph_objects as go
+from scipy import signal
 import numpy as np
 import requests
 import json
@@ -28,12 +30,13 @@ tab_style = {
     'backgroundColor': '#5d90cc',
     'fontWeight': 'bold',
     'color': 'white',
+    'textAlign': 'center', 
     'width': '12.5%'
 }
 
 label_style = {
     'color': 'white',
-    'width': '100%',
+    'width': '100%'
 }
 
 active_label_style = {
@@ -74,12 +77,12 @@ def serve_layout():
                                                 ).decode()
                                             ),
                                             height='auto',
-                                            width='60%',
-					    style={'margin-top': '5%', 'margin-bottom': '5%', 'margin-left': '5%'},
+                                            width='50%', 
+                                            style={'margin-left': '5%'}
                                         )
                                     ], width={'size': 3}, className='text-left'),
                                     dbc.Col([
-                                        html.H1('Prevention before complication', style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '2vw', 'font-family':'glacial indifference , sans-serif'})
+                                        html.H1('Prevention before complication', style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '2.5vw', 'font-family':'glacial indifference , sans-serif'})
                                     ], width={'size': 6}, className='text-center', align="center"),
                                     dbc.Col([
                                         html.Img(
@@ -91,14 +94,14 @@ def serve_layout():
                                                 ).decode()
                                             ),
                                             height='auto',
-                                            width='60%',
-					    style={'margin-top': '10%', 'margin-right': '5%'},
-                                        )
+                                            width='60%', 
+                                            style={'margin-top': '5%'}
+                                        )   
                                     ], width={'size': 3}, className='text-right')
                                 ])
                             ],
                             style={
-				'background': 'linear-gradient(90deg, rgba(223,223,223,1) 0%, rgba(254,254,254,1) 25%, rgba(254,254,254,1) 75%, rgba(223,223,223,1) 100%)'
+                                'background': 'linear-gradient(90deg, rgba(223,223,223,1) 0%, rgba(254,254,254,1) 25%, rgba(254,254,254,1) 75%, rgba(223,223,223,1) 100%)'
                             }
                         )
                     ]
@@ -110,18 +113,18 @@ def serve_layout():
                         id="dashboard-tabs", active_tab='tab1', 
                         children=[
                             dbc.Tab(label='Prevnant', tab_id='tab1', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
-			    dbc.Tab(label='Context', tab_id='tab2', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
+                            dbc.Tab(label='Context', tab_id='tab2', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
                             dbc.Tab(label='Births', tab_id='tab3', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
                             dbc.Tab(label='Morbidity', tab_id='tab4', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
                             dbc.Tab(label='Mortality', tab_id='tab5', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
                             dbc.Tab(label='COVID-19', tab_id='tab6', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
-                            dbc.Tab(label='Model', tab_id='tab7', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),                         
+                            dbc.Tab(label='Model', tab_id='tab7', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style),
                             dbc.Tab(label='Team', tab_id='tab8', tab_style=tab_style, label_style=label_style, active_label_style=active_label_style, active_tab_style=tab_selected_style)
                         ]
                     )
                 ])
             ], no_gutters=False, justify='around'), 
-            dbc.Row(id='tab_content',style={'padding':'0px 15px 15px '})
+            dbc.Row(id='tab_content', style={'padding': '0px 15px 15px'})
         ], fluid=True
     )
         
@@ -132,6 +135,8 @@ app.title = 'Prevnant'
 app.layout = serve_layout
 
 data = DataLoader()
+morbidity_url = 'http://35.188.136.150:5000/morbidity'
+low_weight_url = 'http://35.188.136.150:5000/low_weight'
 
 # Tabs callback
 @app.callback(
@@ -140,7 +145,7 @@ data = DataLoader()
 )
 def tab_selector(tab):
     if tab == 'tab1':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.prevnant_layout()
     elif tab == 'tab2':
         return tabs_layout.context_layout(data)
     elif tab == 'tab3':
@@ -150,11 +155,11 @@ def tab_selector(tab):
     elif tab == 'tab5':
         return tabs_layout.mortality_layout(data)
     elif tab == 'tab6':
-        return tabs_layout.births_layout_2(data)
+        return tabs_layout.covid_layout(data)
     elif tab == 'tab7':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.model_layout()
     elif tab == 'tab8':
-        return tabs_layout.context_layout(data)
+        return tabs_layout.team_layout()
 
 
 # Births callbacks
@@ -163,12 +168,22 @@ def tab_selector(tab):
     Output('plt_births_low_weight_distribution', 'figure'), 
     Input('low_weight_description_selector', 'value')
 )
-def morbidity_plots(input_value):
+def births_plots(input_value):
     if input_value is None:
         return {}, {}
 
     info_ = generate_figures_info.births_low_weight(data, input_value)
     return info_['plt_births_low_weight_description'], info_['plt_births_low_weight_distribution']
+
+@app.callback(
+    Output('plt_births_map', 'figure'), 
+    Input('births_map_var_selector', 'value')
+)
+def births_map(var_selector):
+    if var_selector is None:
+        return {}
+
+    return generate_figures_info.births_map(data, var_selector)
 
 
 # Morbidity callbacks
@@ -186,6 +201,16 @@ def morbidity_plots(input_value):
     info_ = generate_figures_info.morbidity_plots(data, input_value)
     return info_['plt_morbidity_failures'], info_['plt_morbidity_grouped_cause'], info_['plt_morbidity_grouped_cause_year'], info_['plt_morbidity_pregnancy']
 
+@app.callback(
+    Output('plt_morbidity_map', 'figure'), 
+    Input('morbidity_geo_selector', 'value')
+)
+def morbidity_map(geo_selector):
+    if geo_selector is None:
+        return {}
+
+    return generate_figures_info.morbidity_map(data, geo_selector)
+
 
 # Mortality callbacks
 @app.callback(
@@ -201,6 +226,73 @@ def mortality_plots(input_value):
 
     info_ = generate_figures_info.mortality_plots(data, input_value)
     return info_['plt_mortality_demographic'], info_['plt_mortality_year'], info_['plt_mortality_upgd'], info_['plt_mortality_cbmte']
+
+@app.callback(
+    Output('plt_mortality_map', 'figure'), 
+    Input('mortality_geo_selector', 'value')
+)
+def mortality_map(geo_selector):
+    if geo_selector is None:
+        return {}
+
+    return generate_figures_info.mortality_map(data, geo_selector)
+
+
+# Model callbacks
+@app.callback(
+    Output('morbidity_pred', 'children'), 
+    Output('morbidity_pred', 'value'),
+    Output('morbidity_pred', 'color'),
+    Input('morb_predict_btn', 'n_clicks')
+)
+def morbidity_prediction(n_clicks):
+    if n_clicks == 0:
+        return None, None, None
+    
+    data = {'a': 1, 'b': 2}
+    r = requests.post(morbidity_url, data=json.dumps(data))
+    pred = r.json()['prediction']
+    color = 'success' if pred < 50 else 'danger'
+
+    return f'{pred}%', pred, color
+
+
+@app.callback(
+    Output('low_weight_pred', 'children'), 
+    Output('low_weight_pred', 'value'),
+    Output('low_weight_pred', 'color'),
+    Output('low_weight_predict_btn', 'n_clicks'),
+    Input('low_weight_predict_btn', 'n_clicks'), 
+    Input('low_weight_sex', 'value'), 
+    Input('low_weight_mother_age', 'value'), 
+    Input('low_weight_father_age', 'value'), 
+    Input('low_weight_mother_academic', 'value'), 
+    Input('low_weight_sec_reg', 'value'), 
+    Input('low_weight_pren_con', 'value'), 
+    Input('low_weight_prev_children', 'value'), 
+    Input('low_weight_num_pregnancies', 'value'), 
+    Input('low_weight_preg_mult', 'value')
+)
+def low_weight_prediction(n_clicks, sex, m_age, f_age, m_academ, sec_reg, pren_con, prev_child, num_preg, mult):
+    if n_clicks == 0 or None in (sex, m_age, f_age, m_academ, sec_reg, pren_con, prev_child, num_preg, mult):
+        return None, None, None, 0
+
+    data = {
+        'sex': sex, 
+        'mother_age': int(m_age), 
+        'father_age': int(f_age), 
+        'mother_academic': m_academ, 
+        'sec_reg': sec_reg, 
+        'prenatal_consultations': int(pren_con), 
+        'previous_children': int(prev_child), 
+        'num_pregnancies': int(num_preg), 
+        'multiplicity': mult
+    }
+    r = requests.post(low_weight_url, data=json.dumps(data))
+    pred = r.json()['prediction']
+    color = 'success' if pred < 50 else 'danger'
+
+    return f'{pred}%', pred, color, 0
 
 
 if __name__ == "__main__":

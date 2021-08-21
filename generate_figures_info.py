@@ -8,13 +8,15 @@ import pandas as pd
 from copy import deepcopy
 
 px.set_mapbox_access_token('pk.eyJ1IjoiamNnYXJjaWFjYSIsImEiOiJja3JpcWxqbHMweGx1MzFvNDAycm5kamg0In0.6_WucxN67gPjnTDY908xfQ')
-url = 'https://drive.google.com/file/d/1EdmqtgdglX5k3l3TeV0Pv5oxp0TlhjZx/view?usp=sharing'
-url2 = 'https://drive.google.com/uc?id=' + url.split('/')[-2]
-df_loc = pd.read_csv(url2, encoding='ISO-8859-1')
-df_loc = df_loc[df_loc['NOM_DPTO']=='SANTANDER']
-df_loc['NOM_CPOB'] = df_loc['NOM_CPOB'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
-df_loc['NOM_MPIO'] = df_loc['NOM_MPIO'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
+# load divipola municipality
+df_mun = pd.read_csv('/home/project/geodata/DIVIPOLA_CentrosPoblados.csv', encoding='ISO-8859-1')
+df_mun = df_mun[df_mun['NOM_DPTO']=='SANTANDER']
+df_mun['NOM_CPOB'] = df_mun['NOM_CPOB'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+df_mun['NOM_MPIO'] = df_mun['NOM_MPIO'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+
+# load comunas
+df_com = pd.read_csv('/home/project/geodata/coordenadas_bucaramanga.csv', encoding='ISO-8859-1')
 
 def get_age_range(x):
   if x <= 15:
@@ -24,26 +26,54 @@ def get_age_range(x):
   else:
     return 'Between 15 and 35'
 
-def get_lat(idx):
+def get_lat_mun(idx):
   lat = None  
-  df_tmp = df_loc[df_loc['NOM_CPOB']==idx]
+  df_tmp = df_mun[df_mun['NOM_CPOB']==idx]
   if len(df_tmp) > 0:
     lat = df_tmp.iloc[0]['Latitud']
   else:
-    df_tmp = df_loc[df_loc['NOM_MPIO']==idx]
+    df_tmp = df_mun[df_mun['NOM_MPIO']==idx]
     if len(df_tmp) > 0:
       lat = df_tmp.iloc[0]['Latitud']
   return lat
 
-def get_lon(idx):
+def get_lon_mun(idx):
   lon = None
-  df_tmp = df_loc[df_loc['NOM_CPOB']==idx]
+  df_tmp = df_mun[df_mun['NOM_CPOB']==idx]
   if len(df_tmp) > 0:
     lon = df_tmp.iloc[0]['Longitud']
   else:
-    df_tmp = df_loc[df_loc['NOM_MPIO']==idx]
+    df_tmp = df_mun[df_mun['NOM_MPIO']==idx]
     if len(df_tmp) > 0:
       lon = df_tmp.iloc[0]['Longitud']
+  return lon
+
+def get_lat_comuna(idx):
+  lat = None  
+  df_tmp = df_com[df_com['COMUNA'].str.replace(' ', '')==str(idx).replace(' ', '')]
+  if len(df_tmp) > 0:
+    lat = df_tmp.iloc[0]['LATITUD']
+  return lat
+
+def get_lon_comuna(idx):
+  lon = None
+  df_tmp = df_com[df_com['COMUNA'].str.replace(' ', '')==str(idx).replace(' ', '')]
+  if len(df_tmp) > 0:
+    lon = df_tmp.iloc[0]['LONGITUD']
+  return lon
+
+def get_lat_barrio(idx):
+  lat = None  
+  df_tmp = df_com[df_com['BARRIO'].str.replace(' ', '')==str(idx).replace(' ', '')]
+  if len(df_tmp) > 0:
+    lat = df_tmp.iloc[0]['LATITUD']
+  return lat
+
+def get_lon_barrio(idx):
+  lon = None
+  df_tmp = df_com[df_com['BARRIO'].str.replace(' ', '')==str(idx).replace(' ', '')]
+  if len(df_tmp) > 0:
+    lon = df_tmp.iloc[0]['LONGITUD']
   return lon
 
 
@@ -58,11 +88,15 @@ def context(data):
     ))
     fig.update_layout(
         font_family="sans-serif", 
+        xaxis=dict(
+            tickmode='linear',
+            dtick=1
+        ),
         title="Maternal's age", 
         xaxis_title="Age",
         yaxis_title="Number of Maternals",
-        margin=dict(t=50, b=5, l=5, r=5),
-	plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_context_ages'] = deepcopy(fig)
 
@@ -82,7 +116,8 @@ def context(data):
         title='Pregnant women per socioeconomic status', 
         xaxis_title="Number of Pregnant women",
         yaxis_title="Status",
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_context_estrato'] = deepcopy(fig)
 
@@ -92,8 +127,8 @@ def context(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Marital - Age Range - Academic Level of pregnant women',
-        margin=dict(t=50, b=5, l=5, r=5),
-	plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_context_marital_age_academic'] = deepcopy(fig)
 
@@ -102,101 +137,20 @@ def context(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Mother Age (Teenager) and Father Age',
-        margin=dict(t=50, b=5, l=5, r=5),
-	plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_context_parents_age'] = deepcopy(fig)
 
     # mortality_cnt
-    resp['mortality_cnt'] = len(data.df_mortality)
+    resp['mortality_cnt'] = len(data.df_mortality[data.df_mortality['nmun_resi']=='BUCARAMANGA']['num_ide_'].unique())
 
     # morbidity_cnt
     resp['morbidity_cnt'] = len(data.df_morbidity)
 
     # covid_cnt
-    resp['covid_cnt'] = len(data.df_morbidity) # data.df_master['ini_sin_covid'].notnull().sum()
+    resp['covid_cnt'] = data.df_masterv2['fecha_covid'].count()
     
-    return resp
-
-
-def births(data):
-    resp = {}
-
-    # plt_births_low_weight
-    data.df_lb['bajo_peso'] = data.df_lb['peso_gramos'].apply(lambda x: 1 if x < 2500 else 0)
-    fig = px.bar(data.df_lb.groupby('edad_madre')['bajo_peso'].sum().to_frame().reset_index(), x='edad_madre', y='bajo_peso')
-    fig.update_layout(
-        font_family="sans-serif",
-        xaxis=dict(
-            tickmode='linear',
-            dtick=1
-        ),
-        title='Low weight vs Mother Age',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
-    )
-    resp['plt_births_low_weight'] = deepcopy(fig)
-
-    # plt_births_num_children
-    fig = go.Figure()
-    for item in [x for x in range(1, 11)]:
-        fig.add_trace(go.Box(y=data.df_lb[data.df_lb['numero_hijos_nacidos_vivos'] == item]['peso_gramos'], name=item))
-    fig.update_layout(
-        font_family="sans-serif",
-        title='Weight vs Number of children',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
-    )
-    resp['plt_births_num_children'] = deepcopy(fig)
-    
-    # plt_births_multiplicity
-    fig = go.Figure()
-    for item in ['SIMPLE', 'DOBLE']:
-        fig.add_trace(go.Box(y=data.df_lb[data.df_lb['multiplicidad_embarazo'] == item]['peso_gramos'], name=item))
-    fig.update_layout(
-        font_family="sans-serif",
-        title='Weight vs Pregnant multiplicity',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
-    )
-    resp['plt_births_multiplicity'] = deepcopy(fig)
-
-    # plt_births_parents_age
-    fig = go.Figure()
-    for item in ['edad_madre', 'edad_padre']:
-        fig.add_trace(go.Box(y=data.df_lb[item], name=item))
-    fig.update_layout(
-        font_family="sans-serif",
-        title='Parents age',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
-    )
-    resp['plt_births_parents_age'] = deepcopy(fig)
-
-    # plt_births_birth_type
-    fig = go.Figure()
-    for item in ['CESÁREA', 'ESPONTÁNEO', 'INSTRUMENTADO']:
-        fig.add_trace(go.Box(y=data.df_lb[data.df_lb['tipo_parto'] == item]['peso_gramos'], name=item))
-    fig.update_layout(
-        font_family="sans-serif",
-        title='Weight vs Birth type',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
-    )
-    resp['plt_births_birth_type'] = deepcopy(fig)
-
-    # plt_births_marital
-    fig = go.Figure()
-    for item in data.df_lb['estado_conyugal_madre'].unique():
-        fig.add_trace(go.Box(y=data.df_lb[data.df_lb['estado_conyugal_madre'] == item]['peso_gramos'], name=item))
-        fig.update_layout(xaxis=dict(showticklabels=False))
-    fig.update_layout(
-        font_family="sans-serif",
-        title='Weight vs Marital status',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
-    )
-    resp['plt_births_marital'] = deepcopy(fig)
-
     return resp
 
 
@@ -222,7 +176,8 @@ def births_low_weight(data, input_value):
             dtick=1
         ),
         title='Low weight representation',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_births_low_weight_description'] = deepcopy(fig)
 
@@ -232,14 +187,15 @@ def births_low_weight(data, input_value):
     fig.update_layout(
         font_family="sans-serif",
         title='Low weight distribution',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_births_low_weight_distribution'] = deepcopy(fig)
 
     return resp
 
 
-def births2(data):
+def births(data):
     resp = {}
 
     # plt_births_num_children
@@ -255,11 +211,12 @@ def births2(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Number of children',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        barmode='overlay'
+        margin=dict(t=50, b=5, l=5, r=5), 
+        barmode='overlay', 
+        plot_bgcolor = "white"
     )
     fig.update_traces(opacity=0.75)
-    resp['plt_births_num_children_2'] = deepcopy(fig)
+    resp['plt_births_num_children'] = deepcopy(fig)
 
     # plt_births_multiplicity
     fig = go.Figure()
@@ -268,10 +225,11 @@ def births2(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Pregnant multiplicity',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
+        margin=dict(t=50, b=5, l=5, r=5), 
+        showlegend=False, 
+        plot_bgcolor = "white"
     )
-    resp['plt_births_multiplicity_2'] = deepcopy(fig)
+    resp['plt_births_multiplicity'] = deepcopy(fig)
 
     # plt_births_parents_age
     fig = go.Figure()
@@ -280,10 +238,11 @@ def births2(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Parents age',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
+        margin=dict(t=50, b=5, l=5, r=5), 
+        showlegend=False, 
+        plot_bgcolor = "white"
     )
-    resp['plt_births_parents_age_2'] = deepcopy(fig)
+    resp['plt_births_parents_age'] = deepcopy(fig)
 
     # plt_births_birth_type
     keep = ['CESÁREA', 'ESPONTÁNEO']
@@ -296,10 +255,11 @@ def births2(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Birth type',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     fig.update_traces(opacity=0.5)
-    resp['plt_births_birth_type_2'] = deepcopy(fig)
+    resp['plt_births_birth_type'] = deepcopy(fig)
 
     # plt_births_marital
     fig = go.Figure()
@@ -309,12 +269,24 @@ def births2(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Marital status',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white", 
-        showlegend=False
+        margin=dict(t=50, b=5, l=5, r=5), 
+        showlegend=False, 
+        plot_bgcolor = "white"
     )
-    resp['plt_births_marital_2'] = deepcopy(fig)
+    resp['plt_births_marital'] = deepcopy(fig)
 
     return resp
+
+
+def births_map(data, var_selector):
+    if var_selector == 1:
+        # general births - Bucaramanga
+        fig = generate_map_loc(data.df_lb, 'localidad', 'General Births in Bucaramanga', get_lat_comuna, get_lon_comuna)
+    elif var_selector == 2:
+        # low weight - Bucaramanga
+        df_ = data.df_lb[data.df_lb['numero_documento_madre'].astype(str).isin(data.df_lw['num_ide_'].astype(str))].copy()
+        fig = generate_map_loc(df_, 'localidad', 'Low weight Births in Bucaramanga', get_lat_comuna, get_lon_comuna)
+    return fig
 
 
 def morbidity_plots(data, key):
@@ -343,7 +315,8 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Health failures',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_morbidity_failures'] = deepcopy(fig)
 
@@ -360,7 +333,8 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Grouped cause',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_morbidity_grouped_cause'] = deepcopy(fig)
 
@@ -377,7 +351,8 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Grouped cause by year',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_morbidity_grouped_cause_year'] = deepcopy(fig)
 
@@ -395,11 +370,22 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Maternal situation',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_morbidity_pregnancy'] = deepcopy(fig)
 
     return resp
+
+
+def morbidity_map(data, geo_selector):
+    if geo_selector == 1:
+        # municipalities
+        fig = generate_map_mun(data.df_morbidity, 'nmun_resi', 'Morbidity by residence municipality')
+    elif geo_selector == 2:
+        # Bucaramanga
+        fig = generate_map_loc(data.df_morbidity, 'bar_ver_', 'Morbidity in Bucaramanga', get_lat_barrio, get_lon_barrio)
+    return fig
 
 
 def mortality_plots(data, key):
@@ -415,7 +401,8 @@ def mortality_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Maternal Deaths',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_mortality_demographic'] = deepcopy(fig)
 
@@ -429,7 +416,8 @@ def mortality_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Deaths vs Year',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_mortality_year'] = deepcopy(fig)
 
@@ -441,7 +429,8 @@ def mortality_plots(data, key):
         xaxis=dict(showticklabels=False), 
         font_family="sans-serif",
         title='Deaths vs UPGD',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_mortality_upgd'] = deepcopy(fig)
 
@@ -452,22 +441,86 @@ def mortality_plots(data, key):
     fig.update_layout(
         font_family="sans-serif",
         title='Basic Death Cause and Age',
-        margin=dict(t=50, b=5, l=5, r=5),plot_bgcolor = "white"
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
     )
     resp['plt_mortality_cbmte'] = deepcopy(fig)
 
     return resp
 
 
+def mortality_map(data, geo_selector):
+    if geo_selector == 1:
+        # municipalities
+        fig = generate_map_mun(data.df_mortality, 'nmun_resi', 'Mortality by residence municipality')
+    elif geo_selector == 2:
+        # Bucaramanga
+        fig = generate_map_loc(data.df_mortality, 'bar_ver_', 'Mortality in Bucaramanga', get_lat_barrio, get_lon_barrio)
+    return fig
 
-def generate_map(data, col, title):
+
+def covid(data):
+    resp = {}
+    covid_m = data.df_masterv2[~data.df_masterv2['fecha_covid'].isna()].copy()
+
+    # plt_covid_age
+    summary = covid_m.groupby('edad_madre').size().to_frame('Count')
+    fig = px.bar(summary, x=summary.index, y='Count')
+    fig.update_layout(
+        xaxis=dict(
+            tickmode='linear',
+            dtick=1
+        ), 
+        font_family="sans-serif",
+        title='Covid notifications in maternals vs Age',
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
+    )
+    resp['plt_covid_age'] = deepcopy(fig)
+
+    # plt_covid_year
+    covid_m['fecha_covid'] = pd.to_datetime(covid_m['fecha_covid'])
+    summary = covid_m.groupby('fecha_covid').size().to_frame('Count')
+    fig = px.scatter(summary, x=summary.index, y='Count')
+    fig.update_layout(
+        font_family="sans-serif",
+        title='Covid notifications in maternals',
+        margin=dict(t=50, b=5, l=5, r=5), 
+        plot_bgcolor = "white"
+    )
+    resp['plt_covid_year'] = deepcopy(fig)
+
+    # plt_covid_map
+    df_1 = data.df_lb[data.df_lb['numero_documento_madre'].astype(str).isin(covid_m['numero_documento_madre'].astype(str))][['numero_certificado', 'localidad']]
+    df_2 = data.df_morbidity[data.df_morbidity['num_ide_'].astype(str).isin(covid_m['numero_documento_madre'].astype(str))][['num_ide_', 'bar_ver_']].rename(columns={'num_ide_': 'numero_certificado', 'bar_ver_': 'localidad'})
+    df_3 = data.df_mortality[data.df_mortality['num_ide_'].astype(str).isin(covid_m['numero_documento_madre'].astype(str))][['num_ide_', 'bar_ver_']].rename(columns={'num_ide_': 'numero_certificado', 'bar_ver_': 'localidad'})
+    df_ = pd.concat([df_1, df_2, df_3], axis=0)
+    fig = generate_map_loc(df_, 'localidad', 'Covid in Maternals Bucaramanga', get_lat_barrio, get_lon_barrio)
+    resp['plt_covid_map'] = deepcopy(fig)
+
+    return resp
+
+
+def generate_map_mun(data, col, title):
     summary = data[col].value_counts().to_frame(name='Count')
-    summary['Lat'] = summary.index.map(get_lat)
-    summary['Lon'] = summary.index.map(get_lon)
+    summary['Lat'] = summary.index.map(get_lat_mun)
+    summary['Lon'] = summary.index.map(get_lon_mun)
     summary.dropna(inplace=True)
     summary['size'] = np.log(summary['Count']) * 10
     
     fig = px.scatter_mapbox(summary, lat='Lat', lon='Lon', color='Count', size='size', 
                     color_continuous_scale=px.colors.sequential.Bluered, size_max=15, zoom=8, title=title)
+
+    return fig
+
+
+def generate_map_loc(data, col, title, fn_lat, fn_lon):
+    summary = data[col].value_counts().to_frame(name='Count')
+    summary['Lat'] = summary.index.map(fn_lat).astype(float)
+    summary['Lon'] = summary.index.map(fn_lon).astype(float)
+    summary.dropna(inplace=True)
+        
+    fig = px.scatter_mapbox(summary, lat='Lat', lon='Lon', color='Count', size='Count', 
+                    color_continuous_scale=px.colors.sequential.Bluered, size_max=15, zoom=12, title=title)
 
     return fig
