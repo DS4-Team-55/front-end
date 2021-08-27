@@ -38,8 +38,6 @@ def prevnant_layout():
                     )
                 ], width={'size': 3, 'offset': 0}), 
                 dbc.Col([
-                    html.H1('Prevnant', style={'textAlign': 'left', 'fontWeight': 'bold', 'fontSize': '1.5vw', 'font-family':'glacial indifference , sans-serif', 'margin-top': '3%'}), 
-                    html.P('Here we have the app description', style={'textAlign': 'left', 'fontSize': '1vw', 'font-family':'glacial indifference , sans-serif'}), 
                     dbc.Row([
                         dbc.Col([
                             html.Div([
@@ -90,7 +88,7 @@ def prevnant_layout():
                             html.P('Morbidity', style={'textAlign': 'center', 'fontWeight': 'bold', 'fontSize': '0.9vw', 'font-family':'glacial indifference , sans-serif'}), 
                             html.P('Morbidity tab shows general failures as well as pregnancy related issues. Additionally, grouped causes for registered morbidity events are also included. Geographical information about municipalities and Bucaramanga registers are available.', style={'textAlign': 'center', 'fontSize': '0.7vw', 'font-family':'glacial indifference , sans-serif'}), 
                         ], width={'size': 4, 'offset': 0})
-                    ], style={'margin-top': '5%'}, no_gutters=False, justify='around'), 
+                    ], style={'margin-top': '13%'}, no_gutters=False, justify='around'), 
                     dbc.Row([
                         dbc.Col([
                             html.Div([
@@ -162,9 +160,9 @@ def context_layout(data):
                     dbc.Row([
                         dbc.Col([
                             dcc.Graph(
-                                id='plt_context_ages', 
-                                style={'height': '300px'}, 
-                                figure=info_['plt_context_ages']
+                                id='plt_context_ages_status', 
+                                style={'height': '500px'}, 
+                                figure=info_['plt_context_ages_status']
                             )
                         ])
                     ], no_gutters=False, justify='around', style={"margin-top": "20px"}), 
@@ -179,11 +177,11 @@ def context_layout(data):
                             ), 
                             dcc.Graph(
                                 id='plt_context_marital_age_academic', 
-                                style={'height': '600px'}, 
+                                style={'height': '500px'}, 
                                 figure=info_['plt_context_marital_age_academic']
                             )
                         ])
-                    ], style={'margin-top': '20px'}, no_gutters=False, justify='around')
+                    ], style={'margin-top': '50px'}, no_gutters=False, justify='around')
                 ], width={'size': 7, 'offset': 0}), 
                 dbc.Col([
                     dbc.Row([
@@ -209,25 +207,27 @@ def context_layout(data):
                     dbc.Row([
                         dbc.Col([
                             dcc.Graph(
-                                id='plt_context_estrato', 
+                                id='plt_context_consults', 
                                 style={'height': '300px'}, 
-                                figure=info_['plt_context_estrato']
+                                figure=info_['plt_context_consults']
                             )
                         ])
                     ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
                     dbc.Row([
                         dbc.Col([
                             dcc.Graph(
-                                id='plt_context_parents_age', 
+                                id='plt_context_regime', 
                                 style={'height': '400px'}, 
-                                figure=info_['plt_context_parents_age']
-                            ), 
-                            dbc.Alert(
-                                "Inner number shows mother age and external number is father age. You can click them to extend visualization.", 
-                                dismissable=True,
-                                is_open=True,
-                                color='info', 
-                                style={'margin-top': '50px'}
+                                figure=info_['plt_context_regime']
+                            )
+                        ])
+                    ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Graph(
+                                id='plt_context_diff_ages', 
+                                style={'height': '400px'}, 
+                                figure=info_['plt_context_diff_ages']
                             )
                         ])
                     ], style={'margin-top': '50px'}, no_gutters=False, justify='around')
@@ -393,11 +393,11 @@ def morbidity_layout(data):
                     dcc.Dropdown(
                         id='morbidity_var_selector', 
                         options=[
-                            {'label': 'Mother Age', 'value': 'edad_'},
+                            {'label': 'Mother Age', 'value': 'quinquenio'},
                             {'label': 'Gestation Week', 'value': 'sem_ges_'}, 
                             {'label': 'Socioeconomic Status', 'value': 'estrato_'}
                         ],
-                        value='edad_'
+                        value='quinquenio'
                     )
                 ])
             ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
@@ -416,7 +416,7 @@ def morbidity_layout(data):
                         figure={}
                     ), 
                     dbc.Alert(
-                        "Grouded causes are: 1. Trastornos hipertensivos, 2. Complicaciones hemorrágicas, 3. Complicaciones del aborto, 4. Sepsis de origen obstétrico, 5. Sepsis de origen no obstétrico, 6. Sepsis de origen pulmonar, 7. Enfermedad preexistente que se complica, 8. Otra causa.",
+                        "Grouped causes are: 1. Trastornos hipertensivos, 2. Complicaciones hemorrágicas, 3. Complicaciones del aborto, 4. Sepsis de origen obstétrico, 5. Sepsis de origen no obstétrico, 6. Sepsis de origen pulmonar, 7. Enfermedad preexistente que se complica, 8. Otra causa.",
                         dismissable=True,
                         is_open=True,
                         color='warning', 
@@ -432,7 +432,7 @@ def morbidity_layout(data):
                         figure={}
                     ), 
                     dbc.Alert(
-                        "Grouded causes are: 1. Trastornos hipertensivos, 2. Complicaciones hemorrágicas, 3. Complicaciones del aborto, 4. Sepsis de origen obstétrico, 5. Sepsis de origen no obstétrico, 6. Sepsis de origen pulmonar, 7. Enfermedad preexistente que se complica, 8. Otra causa.",
+                        "Grouped causes are: 1. Trastornos hipertensivos, 2. Complicaciones hemorrágicas, 3. Complicaciones del aborto, 4. Sepsis de origen obstétrico, 5. Sepsis de origen no obstétrico, 6. Sepsis de origen pulmonar, 7. Enfermedad preexistente que se complica, 8. Otra causa.",
                         dismissable=True,
                         is_open=True,
                         color='warning', 
@@ -495,11 +495,11 @@ def mortality_layout(data):
                     dcc.Dropdown(
                         id='mortality_var_selector', 
                         options=[
-                            {'label': 'Mother Age', 'value': 'edad_'},
+                            {'label': 'Mother Age', 'value': 'quinquenio'},
                             {'label': 'Gestation Week', 'value': 'sem_ges_'}, 
                             {'label': 'Socioeconomic Status', 'value': 'estrato_'}
                         ],
-                        value='edad_'
+                        value='quinquenio'
                     )
                 ], width={'size': 7, 'offset': 0}), 
                 dbc.Col([], width={'size': 5, 'offset': 0})
@@ -629,7 +629,7 @@ def model_layout():
                 dbc.Col([
                     dbc.Card([
                         dbc.CardBody([
-                            dbc.Row(html.H5('Morbidities', className="card-title")), 
+                            dbc.Row(html.H5('Morbidities and Mortality', className="card-title")), 
                             dbc.Alert(
                                 "This model predicts morbidity probability in pregnant woman. Enter corresponding data then press Predict.",
                                 dismissable=True,
@@ -639,7 +639,125 @@ def model_layout():
                             ), 
                             dbc.Row([
                                 dbc.Col([
-                                    
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Mother Age', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dbc.Input(id='morbidity_mother_age', placeholder='Enter mother age', type="text")
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Gestations weeks', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dbc.Input(id='morbidity_gest_weeks', placeholder='Enter gestations weeks', type="text")
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'),
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Security Regime', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dcc.Dropdown(
+                                                id='morbidity_sec_reg', 
+                                                options=[
+                                                    {'label': 'No asegurado', 'value': 0},
+                                                    {'label': 'Subsidiado', 'value': 1},
+                                                    {'label': 'Contributivo/Excepcion/Especial', 'value': 2}
+                                                ],
+                                                value=0
+                                            )
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('# Prenatal consultations', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dbc.Input(id='morbidity_pren_con', placeholder='Enter prenatal consultations', type="text")
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('# Pregnancies', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dbc.Input(id='morbidity_num_pregnancies', placeholder='Enter number of pregnancies', type="text")
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('# Hospitalizations', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dbc.Input(id='morbidity_num_hosp', placeholder='Enter number of hospitalizations', type="text")
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Marital Status', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dcc.Dropdown(
+                                                id='morbidity_marital', 
+                                                options=[
+                                                    {'label': 'Without partner', 'value': 0},
+                                                    {'label': 'With partner', 'value': 1}
+                                                ],
+                                                value=0
+                                            )
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Mother Academic Level', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dcc.Dropdown(
+                                                id='morbidity_mother_academic', 
+                                                options=[
+                                                    {'label': 'Ninguno', 'value': 0},
+                                                    {'label': 'Preescolar', 'value': 1}, 
+                                                    {'label': 'Basica Primaria', 'value': 2},
+                                                    {'label': 'Basica Secundaria', 'value': 3},
+                                                    {'label': 'Media Academica/Clasica/Tecnica/Normalista', 'value': 4},
+                                                    {'label': 'Tecnica Profesional', 'value': 5},
+                                                    {'label': 'Tecnologica', 'value': 6},
+                                                    {'label': 'Profesional', 'value': 7},
+                                                    {'label': 'Especializacion', 'value': 8},
+                                                    {'label': 'Maestria', 'value': 9},
+                                                    {'label': 'Doctorado', 'value': 10},
+                                                ],
+                                                value=0
+                                            )
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around'), 
+                                    dbc.Row([
+                                        dbc.Col([
+                                            html.P('Covid 19', style={'textAlign': 'right', 'fontSize': '0.75vw', 'font-family':'glacial indifference , sans-serif'})
+                                        ], width={'size': 2, 'offset': 1}), 
+                                        dbc.Col([
+                                            dcc.Dropdown(
+                                                id='morbidity_covid', 
+                                                options=[
+                                                    {'label': 'No', 'value': 0},
+                                                    {'label': 'Yes', 'value': 1}
+                                                ],
+                                                value=0
+                                            )
+                                        ], width={'size': 6, 'offset': 0}), 
+                                        dbc.Col([], width={'size': 3, 'offset': 0})
+                                    ], no_gutters=False, justify='around')
                                 ], width={'size': 6, 'offset': 0}), 
                                 dbc.Col([
                                     html.P('Predict probablity of morbidity in maternal', style={'textAlign': 'left', 'fontWeight': 'bold', 'fontSize': '0.9vw', 'font-family':'glacial indifference , sans-serif'}), 

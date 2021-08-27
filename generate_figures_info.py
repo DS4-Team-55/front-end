@@ -18,14 +18,6 @@ df_mun['NOM_MPIO'] = df_mun['NOM_MPIO'].str.normalize('NFKD').str.encode('ascii'
 # load comunas
 df_com = pd.read_csv('/home/project/geodata/coordenadas_bucaramanga.csv', encoding='ISO-8859-1')
 
-def get_age_range(x):
-  if x <= 15:
-    return 'Under 15'
-  elif x >= 35:
-    return 'Over 35'
-  else:
-    return 'Between 15 and 35'
-
 def get_lat_mun(idx):
   lat = None  
   df_tmp = df_mun[df_mun['NOM_CPOB']==idx]
@@ -77,9 +69,32 @@ def get_lon_barrio(idx):
   return lon
 
 
+def set_age_range(x):
+  if x <= -15:
+    text = '4. Dif 15 años'
+  elif x <= -10:
+    text = '3. Dif 10 años'
+  elif x <= -5:
+    text = '2. Dif 5 años'
+  elif x < 0:
+    text = '1. Dif <5 años'
+  elif x == 0:
+    text = '0. Sin diferencia'
+  elif x > 15:
+    text = '4. Dif 15 años'
+  elif x > 10:
+    text = '3. Dif 10 años'
+  elif x > 5:
+    text = '2. Dif 5 años'
+  elif x > 0:
+    text = '1. Dif <5 años'
+  return text
+
+
 def context(data):
     resp = {}
 
+    '''
     # plt_context_ages
     ages_ = data.df_lb.groupby('edad_madre').size().to_frame(name='Count')
     fig = go.Figure(go.Bar(
@@ -99,7 +114,23 @@ def context(data):
         plot_bgcolor = "white"
     )
     resp['plt_context_ages'] = deepcopy(fig)
+    '''
 
+    # plt_context_ages_status
+    morb_tmp = data.df_morbidity.groupby(['estrato_', 'quinquenio']).size().reset_index(name='Count').sort_values(by=['quinquenio', 'estrato_'], ascending=False).set_index('estrato_')
+    fig = px.bar(morb_tmp, x=morb_tmp.index, y='Count', color='quinquenio', labels={'estrato_': 'Socio Economic Status', 'Count': 'Cases', 'quinquenio': 'Quinquenium'}, 
+            barmode='group', title='Morbidity Cases by Quinquenium and Socio Economic Status')
+    fig.update_layout(
+        margin=dict(t=50, l=5, r=5, b=5), 
+        font_family='sans-serif', 
+        legend=dict(orientation='h', yanchor='top', y=1.0, xanchor='right', x=1), 
+        showlegend=True,
+        plot_bgcolor='white'
+    )
+
+    resp['plt_context_ages_status'] = deepcopy(fig)
+
+    '''
     # plt_context_estrato
     estrato = data.df_master['estrato_'].to_frame().groupby('estrato_').size().to_frame(name='Count')
     fig = go.Figure(go.Bar(
@@ -120,10 +151,24 @@ def context(data):
         plot_bgcolor = "white"
     )
     resp['plt_context_estrato'] = deepcopy(fig)
+    '''
+
+    # plt_context_consults
+    ndf = data.df_lb.groupby(['numero_consultas_prenatales', 'Peso']).size().reset_index(name ='Count').sort_values(by=['Peso', 'numero_consultas_prenatales'], ascending=False).set_index('numero_consultas_prenatales')
+    fig = px.bar(ndf, x=ndf.index, y='Count', color='Peso', labels={'numero_consultas_prenatales': '# Appointment', 'Count': 'Cases', 'Peso': 'Weight'}, title='Low Weight Cases by Appointment Pregnant')
+    fig.update_layout(
+        margin=dict(t=50, l=5, r=5, b=5), 
+        font_family='sans-serif', 
+        legend=dict(orientation='h', yanchor='top', y=1.0, xanchor='right', x=1), 
+        showlegend=True,
+        plot_bgcolor='white'
+    )
+    resp['plt_context_consults'] = deepcopy(fig)
+    
+
 
     # plt_context_marital_age_academic
-    data.df_lb['edad_madre_rango'] = data.df_lb['edad_madre'].map(get_age_range)
-    fig = px.sunburst(data.df_lb, path=['estado_conyugal_madre', 'edad_madre_rango', 'nivel_educativo_madre'])
+    fig = px.sunburst(data.df_lb, path=['conyugal_madre_dict', 'edad_madre_rango', 'madre_academic'])
     fig.update_layout(
         font_family="sans-serif",
         title='Marital - Age Range - Academic Level of pregnant women',
@@ -132,6 +177,7 @@ def context(data):
     )
     resp['plt_context_marital_age_academic'] = deepcopy(fig)
 
+    '''
     # plt_context_parents_age
     fig = px.sunburst(data.df_lb[data.df_lb['edad_madre'] < 18], path=['edad_madre', 'edad_padre'])
     fig.update_layout(
@@ -141,6 +187,57 @@ def context(data):
         plot_bgcolor = "white"
     )
     resp['plt_context_parents_age'] = deepcopy(fig)
+    '''
+
+    # plt_context_regime
+    bpdf = data.df_lb.groupby(['regimen_seguridad', 'Peso']).size().reset_index(name ='Count').sort_values(by=['Peso', 'Count'], ascending=False).set_index('regimen_seguridad')
+    aws = pd.DataFrame(data.df_lb['regimen_seguridad'].value_counts()).reset_index().rename(columns={'index': 'regimen_seguridad', 'regimen_seguridad': 'Count'}).set_index('regimen_seguridad')
+    bpdf['total'] = list(bpdf.reset_index()['regimen_seguridad'].apply(lambda x: aws.loc[x, 'Count']))
+    bpdf['perc'] = bpdf['Count'] / bpdf['total']
+
+    fig = px.sunburst(bpdf, path=[bpdf.index, 'Peso'], values='Count', title="Low Weight Cases by Difference ages between parents", 
+            labels={
+                'regimen_seguridad': 'Diff. Ages.',
+                'Count': 'Cases',
+                'Peso': 'Weight'
+                }
+            )
+    fig.update_layout(
+        margin = dict(t=50, l=5, r=5, b=5), 
+        font_family='sans-serif', 
+        legend=dict(orientation='h', yanchor='top', y=1.1, xanchor='right', x=1), 
+        showlegend=True,
+        plot_bgcolor='white'
+    )
+    fig.update_traces(textinfo="label+percent entry")
+    resp['plt_context_regime'] = deepcopy(fig)
+
+    # plt_context_diff_ages
+    ndf = data.df_lb[data.df_lb['edad_padre'].notna()].copy()
+    ndf['dif_eda'] = ndf['edad_padre'] - ndf['edad_madre']
+    ndf['rang_edad'] = ndf['dif_eda'].map(set_age_range)
+
+    bpdf = ndf.groupby(['rang_edad', 'Peso']).size().reset_index(name ='Count').sort_values(by=['Peso', 'rang_edad'], ascending=False).set_index('rang_edad')
+    aws = pd.DataFrame(ndf['rang_edad'].value_counts()).reset_index().rename(columns={'index': 'rang_edad', 'rang_edad': 'Count'}).set_index('rang_edad')
+
+    bpdf['total'] = list(bpdf.reset_index()['rang_edad'].apply(lambda x: aws.loc[x, 'Count']))
+    bpdf['perc'] = round((bpdf['Count'] / bpdf['total']) * 100, 2)
+
+    fig = px.bar(bpdf, x=bpdf.index, y='perc', color='Peso', title='Low Weight Cases by Difference ages between parents', text='perc',
+            labels={
+                'rang_edad': 'Diff. Ages.',
+                'perc': '%',
+                'Peso': 'Weight'
+            }
+        )
+    fig.update_layout(
+        margin=dict(t=50, l=5, r=5, b=5), 
+        font_family='sans-serif', 
+        legend=dict(orientation='h', yanchor='top', y=1.1, xanchor='right', x=1), 
+        showlegend=True,
+        plot_bgcolor='white'
+    )
+    resp['plt_context_diff_ages'] = deepcopy(fig)
 
     # mortality_cnt
     resp['mortality_cnt'] = len(data.df_mortality[data.df_mortality['nmun_resi']=='BUCARAMANGA']['num_ide_'].unique())
@@ -293,9 +390,9 @@ def morbidity_plots(data, key):
     resp = {}
 
     set1 = ['num_parvag', 'num_cesare', 'num_aborto', 'num_molas']
-    set2 = ['falla_card', 'falla_rena', 'falla_hepa', 'falla_cere', 'falla_resp', 'falla_coag']
-    set3 = ['eclampsia', 'preclampsi', 'choq_septi', 'hemorragia_obstetrica_severa']
-    set4 = ['edad_', 'ocupacion_', 'estrato_', 'sem_ges_', 'caus_agrup', 'anio']
+    set2 = ['falla_cere', 'falla_resp', 'falla_rena', 'falla_coag', 'falla_hepa', 'falla_card']
+    set3 = ['choq_septi', 'eclampsia', 'hemorragia_obstetrica_severa', 'preclampsi']
+    set4 = ['edad_', 'ocupacion_', 'estrato_', 'sem_ges_', 'caus_agrup', 'anio', 'quinquenio', 'trimestre']
 
     # plt_morbidity_failures
     morb = data.df_morbidity[set1 + set2 + set3 + set4].copy()

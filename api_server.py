@@ -8,10 +8,9 @@ import pickle
 app = Flask(__name__)
 
 morb_model_path = 'models/morbidity-model.pkl'
-'''
 with open(morb_model_path, 'rb') as file:
     morbidity_model = pickle.load(file)
-'''
+
 lw_model_path = 'models/low-weight-model.pkl'
 with open(lw_model_path, 'rb') as file:
     low_weight_model = pickle.load(file)
@@ -20,7 +19,8 @@ with open(lw_model_path, 'rb') as file:
 @app.route('/morbidity', methods = ['GET', 'POST'])
 def morbidity_prediction():
     data = json.loads(request.data)
-    resp = json.dumps({'prediction': round(np.random.rand() * 100, 2)})
+    pred = morbidity_model.predict_proba(np.array(list(data.values())).reshape(1, -1))[0][1]
+    resp = json.dumps({'prediction': round(pred * 100, 2)})
     return Response(resp, mimetype='application/json')
 
 @app.route('/low_weight', methods = ['GET', 'POST'])

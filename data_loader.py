@@ -24,69 +24,69 @@ class DataLoader:
         self.df_loc['NOM_CPOB'] = self.df_loc['NOM_CPOB'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
         self.df_loc['NOM_MPIO'] = self.df_loc['NOM_MPIO'].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
+        # dicts
+        marital_dict = {
+            'NO ESTÁ CASADA Y LLEVA DOS AÑOS O MÁS VIVIENDO CON SU PAREJA': 'Pareja >2', 
+            'NO ESTÁ CASADA Y LLEVA MENOS DE DOS AÑOS VIVIENDO CON SU PAREJA': 'Pareja <2', 
+            'ESTÁ CASADA': 'Casada', 
+            'ESTÁ SOLTERA': 'Soltera', 
+            'ESTÁ SEPARADA, DIVORCIADA': 'Separada', 
+            'SIN INFORMACIÓN': 'Sin informacion', 
+            'ESTÁ VIUDA': 'Viuda'
+        }
+
+        academic_dict = {
+            'MEDIA ACADÉMICA O CLÁSICA ': 'Media', 
+            'BÁSICA SECUNDARIA ': 'Secundaria', 
+            'TECNOLÓGICA': 'Tecnologica', 
+            'ESPECIALIZACIÓN': 'Especializacion', 
+            'MAESTRÍA': 'Maestria', 
+            'PROFESIONAL': 'Profesional', 
+            'BÁSICA PRIMARIA': 'Primaria', 
+            'TÉCNICA PROFESIONAL': 'Tecnica', 
+            'MEDIA TÉCNICA ': 'Media Tec.', 
+            'PREESCOLAR': 'Preescolar', 
+            'SIN INFORMACIÓN': 'Sin informacion', 
+            'NORMALISTA': 'Normalista', 
+            'DOCTORADO': 'Doctorado', 
+            'NINGUNO': 'Ninguno'
+        }
+
         # preprocess data
         self.df_lb['edad_madre'] = self.df_lb['edad_madre'].apply(lambda x: x.split('(')[0]).astype(int)
         self.df_lb['edad_padre'] = self.df_lb['edad_padre'].astype(str).apply(lambda x: x.split('(')[0]).astype(int)
+        self.df_lb['edad_madre_rango'] = self.df_lb['edad_madre'].map(self.get_age_range)
+        self.df_lb['conyugal_madre_dict'] = self.df_lb['estado_conyugal_madre'].apply(lambda x: marital_dict[x])
+        self.df_lb['madre_academic'] = self.df_lb['nivel_educativo_madre'].apply(lambda x: academic_dict[x])
+        self.df_lb['Peso'] = self.df_lb['peso_gramos'].apply(lambda x: 'Bajo Peso' if x<2500 else 'Peso Normal')
         self.df_lw['peso_nacer'] = self.df_lw['peso_nacer'].astype(int)
+        self.df_morbidity['quinquenio'] = self.df_morbidity['edad_'].map(self.get_quinquenio)
+        self.df_morbidity['trimestre'] = self.df_morbidity['sem_ges_'].map(self.get_trimestre)
+        self.df_mortality['quinquenio'] = self.df_mortality['edad_'].map(self.get_quinquenio)        
+        self.df_mortality['trimestre'] = self.df_mortality['sem_ges_'].map(self.get_trimestre)
 
 
-    '''
-
-    def get_lat(self, idx):
-        lat = None
-        df_tmp = self.df_loc[self.df_loc['NOM_CPOB']==idx]
-        if len(df_tmp) > 0:
-            lat = df_tmp.iloc[0]['Latitud']
+    def get_age_range(self, x):
+        if x <= 15:
+            return 'Under 15'
+        elif x >= 35:
+            return 'Over 35'
         else:
-            df_tmp = self.df_loc[self.df_loc['NOM_MPIO']==idx]
-            if len(df_tmp) > 0:
-                lat = df_tmp.iloc[0]['Latitud']
-        return lat
+            return 'Between 15 and 35'
 
-    def get_lon(self, idx):
-        lon = None
-        df_tmp = self.df_loc[self.df_loc['NOM_CPOB']==idx]
-        if len(df_tmp) > 0:
-            lon = df_tmp.iloc[0]['Longitud']
+    
+    def get_quinquenio(self, x):
+        q_ = (x - 1) // 5
+        inf = (q_ * 5) + 1
+        sup = (q_ + 1) * 5
+        return f'{inf} - {sup}'
+
+
+    def get_trimestre(self, x):
+        if x <= 12:
+            trimestre = 1
+        elif x <= 26:
+            trimestre = 2
         else:
-            df_tmp = self.df_loc[self.df_loc['NOM_MPIO']==idx]
-            if len(df_tmp) > 0:
-                lon = df_tmp.iloc[0]['Longitud']
-        return lon
-
-    def generate_figures_info(self):
-        figures = []
-        if self.option == 1:
-            # Tab 1            
-            df_morbidity = pd.read_sql(queries.morbidity_query, con=self.credentials)
-            df_covid = pd.read_sql(queries.covid_query, con=self.credentials)
-            df_master = pd.read_sql(queries.master_query, con=self.credentials)
-
-            # Fig 1
-            summary = df_covid['municipio'].value_counts().to_frame(name='Count')
-            summary['Lat'] = summary.index.map(self.get_lat)
-            summary['Lon'] = summary.index.map(self.get_lon)
-            summary.dropna(inplace=True)
-            summary['size'] = np.log(summary['Count']) * 10
-            px.set_mapbox_access_token(self.px_token)
-
-            fig = px.scatter_mapbox(summary, lat='Lat', lon='Lon', color='Count', size='size',
-                            color_continuous_scale=px.colors.sequential.Bluered, size_max=15, zoom=10, title='Coronavirus')
-            figures.append(fig)
-
-            # Fig 2
-            figures.append({})
-
-            # Fig 3 - 4 - 5
-            for key in ['sem_ges_morb', 'tip_ss_', 'caus_princ']:
-                tmp = df_master.groupby(key).size().to_frame(name='Count')
-                ordered_frame = tmp['Count'].sort_values(ascending=False)[:10].to_frame().reset_index()
-
-                figures.append(px.bar(ordered_frame, x=key, y='Count',
-                    hover_data=['Count'], color='Count'))
-
-            # Fig 6
-            figures.append({})
-
-        return figures
-    '''
+            trimestre = 3
+        return trimestre

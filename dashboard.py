@@ -243,18 +243,38 @@ def mortality_map(geo_selector):
     Output('morbidity_pred', 'children'), 
     Output('morbidity_pred', 'value'),
     Output('morbidity_pred', 'color'),
-    Input('morb_predict_btn', 'n_clicks')
+    Output('morb_predict_btn', 'n_clicks'), 
+    Input('morb_predict_btn', 'n_clicks'), 
+    Input('morbidity_mother_age', 'value'), 
+    Input('morbidity_gest_weeks', 'value'), 
+    Input('morbidity_sec_reg', 'value'), 
+    Input('morbidity_pren_con', 'value'), 
+    Input('morbidity_num_pregnancies', 'value'), 
+    Input('morbidity_num_hosp', 'value'), 
+    Input('morbidity_marital', 'value'), 
+    Input('morbidity_mother_academic', 'value'), 
+    Input('morbidity_covid', 'value')
 )
-def morbidity_prediction(n_clicks):
-    if n_clicks == 0:
-        return None, None, None
+def morbidity_prediction(n_clicks, m_age, gest_week, sec_reg, pren_con, num_preg, num_hosp, marital, m_academ, covid):
+    if n_clicks == 0 or None in (m_age, gest_week, sec_reg, pren_con, num_preg, num_hosp, marital, m_academ, covid):
+        return None, None, None, 0
     
-    data = {'a': 1, 'b': 2}
+    data = {
+        'covid': covid,
+        'numero_embarazos': int(num_preg),
+        'numero_consultas': int(pren_con),
+        'no_hospitalizaciones': int(num_hosp),
+        'edad_madre': int(m_age),
+        'conyugal': marital,
+        'educacion': m_academ,
+        'regimen': sec_reg,
+        'tiempo_de_gestacion': int(gest_week)
+    }
     r = requests.post(morbidity_url, data=json.dumps(data))
     pred = r.json()['prediction']
     color = 'success' if pred < 50 else 'danger'
 
-    return f'{pred}%', pred, color
+    return f'{pred}%', pred, color, 0
 
 
 @app.callback(
