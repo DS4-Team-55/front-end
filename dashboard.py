@@ -192,13 +192,16 @@ def births_map(var_selector):
     Output('plt_morbidity_grouped_cause', 'figure'), 
     Output('plt_morbidity_grouped_cause_year', 'figure'), 
     Output('plt_morbidity_pregnancy', 'figure'), 
-    Input('morbidity_var_selector', 'value')
+    Input('morbidity_var_selector', 'value'), 
+    Input('morbidity_year_selector', 'value'), 
+    Input('morbidity_geo_selector', 'value')
 )
-def morbidity_plots(input_value):
-    if input_value is None:
+def morbidity_plots(var_sel, year_sel, geo_sel):
+    if None in (var_sel, year_sel, geo_sel):
         return {}, {}, {}, {}
 
-    info_ = generate_figures_info.morbidity_plots(data, input_value)
+    years = [int(data.years_dict['morbidity'][year_sel[0]]), int(data.years_dict['morbidity'][year_sel[1]])]
+    info_ = generate_figures_info.morbidity_plots(data, var_sel, years, geo_sel)
     return info_['plt_morbidity_failures'], info_['plt_morbidity_grouped_cause'], info_['plt_morbidity_grouped_cause_year'], info_['plt_morbidity_pregnancy']
 
 @app.callback(
@@ -218,13 +221,16 @@ def morbidity_map(geo_selector):
     Output('plt_mortality_year', 'figure'), 
     Output('plt_mortality_upgd', 'figure'), 
     Output('plt_mortality_cbmte', 'figure'),
-    Input('mortality_var_selector', 'value')
+    Input('mortality_var_selector', 'value'), 
+    Input('mortality_year_selector', 'value'), 
+    Input('mortality_geo_selector', 'value')
 )
-def mortality_plots(input_value):
-    if input_value is None:
+def mortality_plots(var_sel, year_sel, geo_sel):
+    if None in (var_sel, year_sel):
         return {}, {}, {}, {}
 
-    info_ = generate_figures_info.mortality_plots(data, input_value)
+    years = [int(data.years_dict['mortality'][year_sel[0]]), int(data.years_dict['mortality'][year_sel[1]])]
+    info_ = generate_figures_info.mortality_plots(data, var_sel, years, geo_sel)
     return info_['plt_mortality_demographic'], info_['plt_mortality_year'], info_['plt_mortality_upgd'], info_['plt_mortality_cbmte']
 
 @app.callback(

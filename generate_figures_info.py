@@ -71,23 +71,23 @@ def get_lon_barrio(idx):
 
 def set_age_range(x):
   if x <= -15:
-    text = '4. Dif 15 años'
+    text = 'Diff 15 years'
   elif x <= -10:
-    text = '3. Dif 10 años'
+    text = 'Diff 10 years'
   elif x <= -5:
-    text = '2. Dif 5 años'
+    text = 'Diff 5 years'
   elif x < 0:
-    text = '1. Dif <5 años'
+    text = 'Diff <5 years'
   elif x == 0:
-    text = '0. Sin diferencia'
+    text = 'W/o Diff'
   elif x > 15:
-    text = '4. Dif 15 años'
+    text = 'Diff 15 years'
   elif x > 10:
-    text = '3. Dif 10 años'
+    text = 'Diff 10 years'
   elif x > 5:
-    text = '2. Dif 5 años'
+    text = 'Diff 5 years'
   elif x > 0:
-    text = '1. Dif <5 años'
+    text = 'Diff <5 years'
   return text
 
 
@@ -123,7 +123,7 @@ def context(data):
     fig.update_layout(
         margin=dict(t=50, l=5, r=5, b=5), 
         font_family='sans-serif', 
-        legend=dict(orientation='h', yanchor='top', y=1.0, xanchor='right', x=1), 
+        legend=dict(orientation='v', yanchor='top', y=1.0, xanchor='right', x=1), 
         showlegend=True,
         plot_bgcolor='white'
     )
@@ -159,7 +159,7 @@ def context(data):
     fig.update_layout(
         margin=dict(t=50, l=5, r=5, b=5), 
         font_family='sans-serif', 
-        legend=dict(orientation='h', yanchor='top', y=1.0, xanchor='right', x=1), 
+        legend=dict(orientation='v', yanchor='top', y=1.0, xanchor='right', x=1), 
         showlegend=True,
         plot_bgcolor='white'
     )
@@ -195,7 +195,7 @@ def context(data):
     bpdf['total'] = list(bpdf.reset_index()['regimen_seguridad'].apply(lambda x: aws.loc[x, 'Count']))
     bpdf['perc'] = bpdf['Count'] / bpdf['total']
 
-    fig = px.sunburst(bpdf, path=[bpdf.index, 'Peso'], values='Count', title="Low Weight Cases by Difference ages between parents", 
+    fig = px.sunburst(bpdf, path=[bpdf.index, 'Peso'], values='Count', title="Low Weight Cases by Regime", 
             labels={
                 'regimen_seguridad': 'Diff. Ages.',
                 'Count': 'Cases',
@@ -223,7 +223,7 @@ def context(data):
     bpdf['total'] = list(bpdf.reset_index()['rang_edad'].apply(lambda x: aws.loc[x, 'Count']))
     bpdf['perc'] = round((bpdf['Count'] / bpdf['total']) * 100, 2)
 
-    fig = px.bar(bpdf, x=bpdf.index, y='perc', color='Peso', title='Low Weight Cases by Difference ages between parents', text='perc',
+    fig = px.bar(bpdf, x=bpdf.index, y='perc', color='Peso', title='Low Weight Cases by Difference between parent ages', text='perc',
             labels={
                 'rang_edad': 'Diff. Ages.',
                 'perc': '%',
@@ -231,12 +231,13 @@ def context(data):
             }
         )
     fig.update_layout(
-        margin=dict(t=50, l=5, r=5, b=5), 
+        margin=dict(t=40, l=5, r=5, b=5), 
         font_family='sans-serif', 
-        legend=dict(orientation='h', yanchor='top', y=1.1, xanchor='right', x=1), 
+        #legend=dict(orientation='v', yanchor='top', y=1.1, xanchor='right', x=1), 
         showlegend=True,
         plot_bgcolor='white'
     )
+    fig.update_xaxes(categoryorder='array', categoryarray= ['Diff 15 years', 'Diff 10 years', 'Diff 5 years', 'Diff <5 years', 'W/o Diff'])
     resp['plt_context_diff_ages'] = deepcopy(fig)
 
     # mortality_cnt
@@ -254,8 +255,9 @@ def context(data):
 def births_low_weight(data, input_value):
     resp = {}
     map_dict = {
-        1: 'edad_', 2: 'sem_gest', 3: 'estrato_', 4: 'sexo', 
-        5: 'niv_edu_ma', 7: 'mult_embar', 8: 'num_em_pre'
+        1: ['edad_', 'Mother Age'], 2: ['sem_gest', 'Gestation Weeks'], 3: ['estrato_', 'Socioeconomic Status'], 4: ['sexo', 'Sex'], 
+        5: ['niv_edu_ma', 'Academic Level'], 6: ['numero_consultas_prenatales', 'Prenatal consultations'], 7: ['mult_embar', 'Multiplicity of pregnancy'], 
+        8: ['num_em_pre', 'Previous pregnancy']
     }
 
     # plt_births_low_weight_description
@@ -264,7 +266,7 @@ def births_low_weight(data, input_value):
         tmp = data.df_lb[data.df_lb['numero_documento_madre'].astype(str).isin(data.df_lw['num_ide_'].astype(str))].groupby(key).size().to_frame(name='Count').reset_index()
         fig = px.bar(tmp, x=key, y='Count')
     else:
-        key = map_dict[input_value]
+        key = map_dict[input_value][0]
         fig = px.bar(data.df_lw.groupby(key).size().to_frame(name='Count').reset_index(), x=key, y='Count')
     fig.update_layout(
         font_family="sans-serif",
@@ -273,6 +275,7 @@ def births_low_weight(data, input_value):
             dtick=1
         ),
         title='Low weight representation',
+        xaxis_title=map_dict[input_value][1],
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -284,6 +287,8 @@ def births_low_weight(data, input_value):
     fig.update_layout(
         font_family="sans-serif",
         title='Low weight distribution',
+        yaxis_title='Count',
+        xaxis_title='Weight',
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -308,6 +313,8 @@ def births(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Number of children',
+        xaxis_title='Weight',
+        yaxis_title='Count',
         margin=dict(t=50, b=5, l=5, r=5), 
         barmode='overlay', 
         plot_bgcolor = "white"
@@ -322,6 +329,7 @@ def births(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Pregnant multiplicity',
+        yaxis_title='Weight',
         margin=dict(t=50, b=5, l=5, r=5), 
         showlegend=False, 
         plot_bgcolor = "white"
@@ -335,6 +343,7 @@ def births(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Parents age',
+        yaxis_title='Age',
         margin=dict(t=50, b=5, l=5, r=5), 
         showlegend=False, 
         plot_bgcolor = "white"
@@ -352,6 +361,8 @@ def births(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Birth type',
+        xaxis_title='Weight',
+        yaxis_title='Distribution',
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -366,6 +377,8 @@ def births(data):
     fig.update_layout(
         font_family="sans-serif",
         title='Weight vs Marital status',
+        xaxis_title='Marital status',
+        yaxis_title='Weight',
         margin=dict(t=50, b=5, l=5, r=5), 
         showlegend=False, 
         plot_bgcolor = "white"
@@ -386,16 +399,35 @@ def births_map(data, var_selector):
     return fig
 
 
-def morbidity_plots(data, key):
-    resp = {}
+def morbidity_plots(data, key, years, geo_selector):
+    resp = {
+        'plt_morbidity_failures': {}, 
+        'plt_morbidity_grouped_cause': {}, 
+        'plt_morbidity_grouped_cause_year': {}, 
+        'plt_morbidity_pregnancy': {}
+    }
+
+    map_dict = {
+        'quinquenio': 'Quinquennium', 
+        'sem_ges_': 'Gestation Weeks', 
+        'estrato_': 'Socioeconomic Status'
+    }
+    
+    tmp = data.df_morbidity[(data.df_morbidity['anio'] >= years[0]) & (data.df_morbidity['anio'] <= years[1])]
+    if geo_selector == 2:
+        # Bucaramanga
+        tmp = tmp[tmp['nmun_resi']=='BUCARAMANGA']
+    
+    if len(tmp) == 0:
+        return resp
 
     set1 = ['num_parvag', 'num_cesare', 'num_aborto', 'num_molas']
     set2 = ['falla_cere', 'falla_resp', 'falla_rena', 'falla_coag', 'falla_hepa', 'falla_card']
     set3 = ['choq_septi', 'eclampsia', 'hemorragia_obstetrica_severa', 'preclampsi']
-    set4 = ['edad_', 'ocupacion_', 'estrato_', 'sem_ges_', 'caus_agrup', 'anio', 'quinquenio', 'trimestre']
+    set4 = ['edad_', 'ocupacion_', 'estrato_', 'sem_ges_', 'caus_agrup', 'anio', 'quinquenio', 'group_week']
 
     # plt_morbidity_failures
-    morb = data.df_morbidity[set1 + set2 + set3 + set4].copy()
+    morb = tmp[set1 + set2 + set3 + set4].copy()
     for item in set2 + set3:
         morb[item] = morb[item].apply(lambda x: 0 if x == 2 else x)
     morb_tmp = morb[set1 + set2 + set3 + [key]].groupby(key).sum()
@@ -412,6 +444,8 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Health failures',
+        xaxis_title=map_dict[key], 
+        yaxis_title='Count', 
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -430,6 +464,7 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Grouped cause',
+        xaxis_title=map_dict[key], 
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -448,6 +483,7 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Grouped cause by year',
+        xaxis_title='Year', 
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -467,6 +503,8 @@ def morbidity_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Maternal situation',
+        xaxis_title=map_dict[key], 
+        yaxis_title='Count', 
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -485,11 +523,31 @@ def morbidity_map(data, geo_selector):
     return fig
 
 
-def mortality_plots(data, key):
-    resp = {}
+def mortality_plots(data, key, years, geo_selector):
+    resp = {
+        'plt_mortality_demographic': {}, 
+        'plt_mortality_year': {}, 
+        'plt_mortality_upgd': {}, 
+        'plt_mortality_cbmte': {}
+    }
+
+    map_dict = {
+        'quinquenio': 'Quinquennium', 
+        'sem_ges_': 'Gestation Weeks', 
+        'estrato_': 'Socioeconomic Status'
+    }
+
+    tmp = data.df_mortality[(data.df_mortality['anio'] >= years[0]) & (data.df_mortality['anio'] <= years[1])]
+    tmp.drop_duplicates(subset='num_ide_', inplace=True)
+    if geo_selector == 2:
+        # Bucaramanga
+        tmp = tmp[tmp['nmun_resi']=='BUCARAMANGA']
+
+    if len(tmp) == 0:
+        return resp
 
     # plt_mortality_demographic
-    summary = data.df_mortality.groupby(key).size().to_frame(name='Count')
+    summary = tmp.groupby(key).size().to_frame(name='Count')
     fig = px.bar(summary, x=summary.index, y='Count')
     fig.update_layout(
         xaxis=dict(
@@ -498,13 +556,14 @@ def mortality_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Maternal Deaths',
+        xaxis_title=map_dict[key], 
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
     resp['plt_mortality_demographic'] = deepcopy(fig)
 
     # plt_mortality_year
-    summary = data.df_mortality.groupby('anio').size().to_frame(name='Count')
+    summary = tmp.groupby('anio').size().to_frame(name='Count')
     fig = px.bar(summary, x=summary.index, y='Count')
     fig.update_layout(
         xaxis=dict(
@@ -513,6 +572,7 @@ def mortality_plots(data, key):
         ), 
         font_family="sans-serif",
         title='Deaths vs Year',
+        xaxis_title='Year',
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -520,12 +580,13 @@ def mortality_plots(data, key):
 
 
     # plt_mortality_upgd
-    summary = data.df_mortality.groupby('nom_upgd').size().to_frame(name='Count')
+    summary = tmp.groupby('nom_upgd').size().to_frame(name='Count')
     fig = px.bar(summary, x=summary.index, y='Count')
     fig.update_layout(
         xaxis=dict(showticklabels=False), 
         font_family="sans-serif",
         title='Deaths vs UPGD',
+        xaxis_title='UPGD',
         margin=dict(t=50, b=5, l=5, r=5), 
         plot_bgcolor = "white"
     )
@@ -534,7 +595,7 @@ def mortality_plots(data, key):
 
     # plt_mortality_cbmte
     keep = ['U071', 'R579', 'J159', 'U072', 'I472', 'R571', 'I619'] # more than 1
-    fig = px.sunburst(data.df_mortality[data.df_mortality['cbmte_'].isin(keep)], path=['cbmte_', 'edad_'])
+    fig = px.sunburst(tmp[tmp['cbmte_'].isin(keep)], path=['cbmte_', 'edad_'])
     fig.update_layout(
         font_family="sans-serif",
         title='Basic Death Cause and Age',
@@ -562,7 +623,12 @@ def covid(data):
 
     # plt_covid_age
     summary = covid_m.groupby('edad_madre').size().to_frame('Count')
-    fig = px.bar(summary, x=summary.index, y='Count')
+    fig = px.bar(
+        summary, x=summary.index, y='Count', 
+        labels={
+            'edad_madre': 'Mother Age'
+        }
+    )
     fig.update_layout(
         xaxis=dict(
             tickmode='linear',
@@ -576,9 +642,17 @@ def covid(data):
     resp['plt_covid_age'] = deepcopy(fig)
 
     # plt_covid_year
-    covid_m['fecha_covid'] = pd.to_datetime(covid_m['fecha_covid'])
-    summary = covid_m.groupby('fecha_covid').size().to_frame('Count')
-    fig = px.scatter(summary, x=summary.index, y='Count')
+    covid_m['year'] = pd.to_datetime(covid_m['fecha_covid'], format='%d/%m/%Y').dt.year
+    covid_m['month'] = pd.to_datetime(covid_m['fecha_covid'], format='%d/%m/%Y').dt.month
+    summary = covid_m[['year', 'month']].groupby(['year', 'month']).size().to_frame(name='Count').reset_index()
+    summary['ym'] = pd.to_datetime(summary[['year', 'month']].assign(DAY=1)).dt.date.apply(lambda x: x.strftime('%Y-%m'))
+
+    fig = px.bar(
+        summary, x='ym', y='Count', 
+        labels={
+            'ym': 'Date'
+        }
+    )
     fig.update_layout(
         font_family="sans-serif",
         title='Covid notifications in maternals',

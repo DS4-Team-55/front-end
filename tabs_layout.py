@@ -168,20 +168,20 @@ def context_layout(data):
                     ], no_gutters=False, justify='around', style={"margin-top": "20px"}), 
                     dbc.Row([
                         dbc.Col([
-                            dbc.Alert(
-                                "Here you can explore some demographic variables such as mother marital status, their age range and academic level. You can click any field in the plot in order to go deeper in the data.", 
-                                dismissable=True,
-                                is_open=True,
-                                color='warning', 
-                                style={'margin-top': '50px'}
-                            ), 
                             dcc.Graph(
                                 id='plt_context_marital_age_academic', 
                                 style={'height': '500px'}, 
                                 figure=info_['plt_context_marital_age_academic']
+                            ), 
+                            dbc.Alert(
+                                "Here you can explore some demographic variables such as mother marital status, their age range and academic level. You can click any field in the plot in order to go deeper in the data. Couple > 2: Parents have lived together for more than two years. Couple < 2: Parents have lived together for less than two years", 
+                                dismissable=True,
+                                is_open=True,
+                                color='warning', 
+                                style={'margin-top': '10px'}
                             )
                         ])
-                    ], style={'margin-top': '50px'}, no_gutters=False, justify='around')
+                    ], style={'margin-top': '65px'}, no_gutters=False, justify='around')
                 ], width={'size': 7, 'offset': 0}), 
                 dbc.Col([
                     dbc.Row([
@@ -379,8 +379,33 @@ def births_layout(data):
 
 
 def morbidity_layout(data):
+    years = list(data.years_dict['morbidity'].keys())
+    min_year = years[0]
+    max_year = years[-1]
     return dbc.Col(
         [
+            dbc.Row([
+                dbc.Col([
+                    dcc.RangeSlider(
+                        id='morbidity_year_selector', 
+                        min=min_year,
+                        max=max_year,
+                        step=None,
+                        marks=data.years_dict['morbidity'],
+                        value=[min_year, max_year]
+                    )
+                ], width={'size': 7, 'offset': 2}), 
+                dbc.Col([
+                    dcc.Dropdown(
+                        id='morbidity_geo_selector', 
+                        options=[
+                            {'label': 'Municipalities', 'value': 1},
+                            {'label': 'Bucaramanga', 'value': 2}
+                        ],
+                        value=1
+                    )
+                ], width={'size': 2, 'offset': 0})
+            ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
             dbc.Row([
                 dbc.Col([
                     dbc.Alert(
@@ -450,22 +475,12 @@ def morbidity_layout(data):
             dbc.Row([
                 dbc.Col([
                     dbc.Alert(
-                        "The map below shows morbidities in department or in Bucaramanga. You can select which one with the corresponding radio button.",
+                        "The map below shows morbidities in department or in Bucaramanga. You can select which one with the corresponding selector above.",
                         dismissable=True,
                         is_open=True,
-                        color='info', 
+                        color='warning', 
                         style={'margin-top': '10px'}
                     ), 
-                    dcc.RadioItems(
-                        id='morbidity_geo_selector', 
-                        options=[
-                            {'label': 'Municipalities', 'value': 1},
-                            {'label': 'Bucaramanga', 'value': 2}
-                        ],
-                        value=1,
-                        labelStyle={'display': 'inline-block'}, 
-                        inputStyle={'margin-right': '15px', 'margin-left': '60px'}
-                    ) 
                 ], width={'size': 10, 'offset': 0})
             ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
             dbc.Row([
@@ -481,8 +496,33 @@ def morbidity_layout(data):
 
 
 def mortality_layout(data):
+    years = list(data.years_dict['mortality'].keys())
+    min_year = years[0]
+    max_year = years[-1]
     return dbc.Col(
         [
+            dbc.Row([
+                dbc.Col([
+                    dcc.RangeSlider(
+                        id='mortality_year_selector', 
+                        min=min_year,
+                        max=max_year,
+                        step=None,
+                        marks=data.years_dict['mortality'],
+                        value=[min_year, max_year]
+                    )
+                ], width={'size': 7, 'offset': 2}), 
+                dbc.Col([
+                    dcc.Dropdown(
+                        id='mortality_geo_selector', 
+                        options=[
+                            {'label': 'Municipalities', 'value': 1},
+                            {'label': 'Bucaramanga', 'value': 2}
+                        ],
+                        value=1
+                    )
+                ], width={'size': 2, 'offset': 0})
+            ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 
             dbc.Row([
                 dbc.Col([
                     dbc.Alert(
@@ -536,38 +576,28 @@ def mortality_layout(data):
                     )
                 ], width={'size': 6, 'offset': 0}),
                 dbc.Col([
-                    dbc.Alert(
-                        "Inner data shows basic cause of death and external number show coresponding mother age. You can click them to extend visualization. U071: COVID-19 (virus identificado). R579: Choque, No Especificado. J159: Neumonía bacteriana, no especificada U072: COVID-19 (virus no identificado). I472: Taquicardia Ventricular. I619: I619	Hemorragia Intracefálica, No Especificada. R571: Choque Hipovolémico",
-                        dismissable=True,
-                        is_open=True,
-                        color='info', 
-                        style={'margin-top': '10px'}
-                    ), 
                     dcc.Graph(
                         id='plt_mortality_cbmte', 
                         style={'height': '500px'}, 
                         figure={}
+                    ), 
+                    dbc.Alert(
+                        "Inner data shows basic cause of death and external number show coresponding mother age. You can click them to extend visualization. U071: COVID-19 (virus identificado). R579: Choque, No Especificado. J159: Neumonía bacteriana, no especificada U072: COVID-19 (virus no identificado). I472: Taquicardia Ventricular. I619: I619	Hemorragia Intracefálica, No Especificada. R571: Choque Hipovolémico",
+                        dismissable=True,
+                        is_open=True,
+                        color='warning', 
+                        style={'margin-top': '10px'}
                     )
                 ], width={'size': 6, 'offset': 0})
             ], style={'margin-top': '20px'}, no_gutters=False, justify='around'), 
             dbc.Row([
                 dbc.Col([
                     dbc.Alert(
-                        "The map below shows mortality registers in department or in Bucaramanga. You can select which one with the corresponding radio button.",
+                        "The map below shows mortality registers in department or in Bucaramanga. You can select which one with the corresponding selector above.",
                         dismissable=True,
                         is_open=True,
                         color='warning', 
                         style={'margin-top': '10px'}
-                    ), 
-                    dcc.RadioItems(
-                        id='mortality_geo_selector', 
-                        options=[
-                            {'label': 'Municipalities', 'value': 1},
-                            {'label': 'Bucaramanga', 'value': 2}
-                        ],
-                        value=1,
-                        labelStyle={'display': 'inline-block'}, 
-                        inputStyle={'margin-right': '15px', 'margin-left': '60px'}
                     ) 
                 ], width={'size': 10, 'offset': 0})
             ], style={'margin-top': '50px'}, no_gutters=False, justify='around'), 

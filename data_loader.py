@@ -26,13 +26,13 @@ class DataLoader:
 
         # dicts
         marital_dict = {
-            'NO ESTÁ CASADA Y LLEVA DOS AÑOS O MÁS VIVIENDO CON SU PAREJA': 'Pareja >2', 
-            'NO ESTÁ CASADA Y LLEVA MENOS DE DOS AÑOS VIVIENDO CON SU PAREJA': 'Pareja <2', 
-            'ESTÁ CASADA': 'Casada', 
-            'ESTÁ SOLTERA': 'Soltera', 
-            'ESTÁ SEPARADA, DIVORCIADA': 'Separada', 
-            'SIN INFORMACIÓN': 'Sin informacion', 
-            'ESTÁ VIUDA': 'Viuda'
+            'NO ESTÁ CASADA Y LLEVA DOS AÑOS O MÁS VIVIENDO CON SU PAREJA': 'Couple >2', 
+            'NO ESTÁ CASADA Y LLEVA MENOS DE DOS AÑOS VIVIENDO CON SU PAREJA': 'Couple <2', 
+            'ESTÁ CASADA': 'Married', 
+            'ESTÁ SOLTERA': 'Single', 
+            'ESTÁ SEPARADA, DIVORCIADA': 'Separated', 
+            'SIN INFORMACIÓN': 'Unknown', 
+            'ESTÁ VIUDA': 'Widow'
         }
 
         academic_dict = {
@@ -58,13 +58,20 @@ class DataLoader:
         self.df_lb['edad_madre_rango'] = self.df_lb['edad_madre'].map(self.get_age_range)
         self.df_lb['conyugal_madre_dict'] = self.df_lb['estado_conyugal_madre'].apply(lambda x: marital_dict[x])
         self.df_lb['madre_academic'] = self.df_lb['nivel_educativo_madre'].apply(lambda x: academic_dict[x])
-        self.df_lb['Peso'] = self.df_lb['peso_gramos'].apply(lambda x: 'Bajo Peso' if x<2500 else 'Peso Normal')
+        self.df_lb['Peso'] = self.df_lb['peso_gramos'].apply(lambda x: 'Low Weight' if x<2500 else 'Normal Weight')
+        self.df_lb['year'] = pd.to_datetime(self.df_lb['fecha_nacimiento']).dt.year
         self.df_lw['peso_nacer'] = self.df_lw['peso_nacer'].astype(int)
         self.df_morbidity['quinquenio'] = self.df_morbidity['edad_'].map(self.get_quinquenio)
-        self.df_morbidity['trimestre'] = self.df_morbidity['sem_ges_'].map(self.get_trimestre)
-        self.df_mortality['quinquenio'] = self.df_mortality['edad_'].map(self.get_quinquenio)        
-        self.df_mortality['trimestre'] = self.df_mortality['sem_ges_'].map(self.get_trimestre)
+        self.df_morbidity['group_week'] = self.df_morbidity['sem_ges_'].map(self.get_group_week)
+        self.df_mortality['quinquenio'] = self.df_mortality['edad_'].map(self.get_quinquenio)
+        self.df_mortality['group_week'] = self.df_mortality['sem_ges_'].map(self.get_group_week)
 
+        self.years_dict = {
+            'mortality': {idx: str(year) for idx, year in enumerate(sorted(self.df_mortality['anio'].unique()))}, 
+            'morbidity': {idx: str(year) for idx, year in enumerate(sorted(self.df_morbidity['anio'].unique()))}, 
+            'births': {idx: str(year) for idx, year in enumerate(sorted(self.df_lb['year'].unique()))}
+        }
+        
 
     def get_age_range(self, x):
         if x <= 15:
@@ -82,11 +89,8 @@ class DataLoader:
         return f'{inf} - {sup}'
 
 
-    def get_trimestre(self, x):
-        if x <= 12:
-            trimestre = 1
-        elif x <= 26:
-            trimestre = 2
-        else:
-            trimestre = 3
-        return trimestre
+    def get_group_week(self, x):
+        q_ = (x - 1) // 4
+        inf = (q_ * 4) + 1
+        sup = (q_ + 1) * 4
+        return f'{inf} - {sup}'
