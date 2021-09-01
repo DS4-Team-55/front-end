@@ -63,7 +63,7 @@ This project uses Docker, such that you only need to install it.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/jcgarciaca/ds4a.git
+   git clone https://github.com/DS4-Team-55/front-end.git
    ```
 2. Run the start script. It may take some minutes while all dependencies are installed.
    ```sh
