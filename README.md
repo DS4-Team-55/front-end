@@ -105,4 +105,4 @@ You can explore the data through every tab in the app. Additionally, in `Model` 
 * David Castrillon - [Contact](https://www.linkedin.com/in/david-castrillon-95b28712b/)
 * David Angarita - [Contact](https://www.linkedin.com/in/david-angarita-275700190)
 * Ever Augusto Torres - [Contact](https://www.linkedin.com/in/evertorres/)
-* Julio Cesar Garcia - [Contact](https://twitter.com/your_username)
+* Julio Cesar Garcia - [Contact](https://www.linkedin.com/in/jcgarciaca/)
